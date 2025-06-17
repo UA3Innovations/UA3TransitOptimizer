@@ -1,32 +1,10 @@
 // components/dashboard/WelcomeCard.tsx
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { User } from '../../types/auth';
 
 interface Props {
   user: User;
 }
-
-export const WelcomeCard: React.FC<Props> = ({ user }) => {
-  return (
-    <View style={styles.welcomeCard}>
-      <View style={styles.welcomeHeader}>
-        <Text style={styles.welcomeTitle}>
-          {user.role === 'admin' ? '🎯 AI Transit Optimization' : '⚙️ Developer Console'}
-        </Text>
-        <Text style={styles.welcomeSubtitle}>
-          {user.role === 'admin' 
-            ? 'Streamlined. Intelligent. Results-driven.' 
-            : 'Full system access • Advanced controls • Real-time monitoring'
-          }
-        </Text>
-      </View>
-      <View style={styles.statusBadge}>
-        <Text style={styles.statusText}>System Operational</Text>
-      </View>
-    </View>
-  );
-};
 
 const styles = StyleSheet.create({
   welcomeCard: {

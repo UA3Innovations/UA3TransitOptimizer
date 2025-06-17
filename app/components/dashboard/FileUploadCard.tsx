@@ -30,32 +30,49 @@ export const FileUploadCard: React.FC<Props> = ({
   return (
     <View style={styles.uploadCard}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>📁 Data Management</Text>
-        <View style={styles.cardHeaderActions}>
-          <TouchableOpacity 
-            style={styles.viewDataButton}
-            onPress={onViewData}
-          >
-            <Text style={styles.viewDataText}>👁️ View Data</Text>
-          </TouchableOpacity>
+        <View style={styles.cardTitleContainer}>
+          <View style={styles.cardIconContainer}>
+            <Text style={styles.cardIcon}>📁</Text>
+          </View>
+          <Text style={styles.cardTitle}>Data Management</Text>
         </View>
+        <TouchableOpacity 
+          style={styles.viewDataButton}
+          onPress={onViewData}
+        >
+          <View style={styles.viewDataButtonContent}>
+            <Text style={styles.viewDataIcon}>👁️</Text>
+            <Text style={styles.viewDataText}>View Data</Text>
+          </View>
+        </TouchableOpacity>
       </View>
       
       {/* Developer için iki seçenek */}
       {user.role === 'developer' ? (
         <View style={styles.developerOptions}>
-          <Text style={styles.optionsTitle}>Choose Data Source:</Text>
+          <View style={styles.optionsTitleContainer}>
+            <View style={styles.optionsDivider} />
+            <Text style={styles.optionsTitle}>Choose Data Source</Text>
+            <View style={styles.optionsDivider} />
+          </View>
           
           {/* Option 1: Upload your own files */}
           <TouchableOpacity 
-            style={styles.optionCard}
+            style={[styles.optionCard, styles.uploadOptionCard]}
             onPress={onFileUpload}
             disabled={isUploading}
           >
             {isUploading ? (
               <View style={styles.uploadLoading}>
-                <ActivityIndicator size="large" color="#dc2626" />
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#dc2626" />
+                </View>
                 <Text style={styles.uploadLoadingText}>Processing files...</Text>
+                <View style={styles.loadingDots}>
+                  <Text style={styles.loadingDot}>•</Text>
+                  <Text style={styles.loadingDot}>•</Text>
+                  <Text style={styles.loadingDot}>•</Text>
+                </View>
               </View>
             ) : (
               <View style={styles.optionContent}>
@@ -64,10 +81,11 @@ export const FileUploadCard: React.FC<Props> = ({
                 </View>
                 <Text style={styles.optionTitle}>Upload Historical Data</Text>
                 <Text style={styles.optionDescription}>
-                  Use your own CSV, Excel, or JSON transit data files
+                  Use your own CSV transit data files
                 </Text>
                 <View style={styles.optionButton}>
                   <Text style={styles.optionButtonText}>Browse Files</Text>
+                  <Text style={styles.optionButtonArrow}>→</Text>
                 </View>
               </View>
             )}
@@ -75,7 +93,7 @@ export const FileUploadCard: React.FC<Props> = ({
 
           {/* Option 2: Generate from simulation */}
           <TouchableOpacity 
-            style={styles.optionCard}
+            style={[styles.optionCard, styles.simulationOptionCard]}
             onPress={onGoToSimulation}
             disabled={isUploading}
           >
@@ -89,6 +107,7 @@ export const FileUploadCard: React.FC<Props> = ({
               </Text>
               <View style={[styles.optionButton, styles.simulationButton]}>
                 <Text style={styles.optionButtonText}>Go to Simulation</Text>
+                <Text style={styles.optionButtonArrow}>→</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -102,8 +121,15 @@ export const FileUploadCard: React.FC<Props> = ({
         >
           {isUploading ? (
             <View style={styles.uploadLoading}>
-              <ActivityIndicator size="large" color="#dc2626" />
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#dc2626" />
+              </View>
               <Text style={styles.uploadLoadingText}>Processing files...</Text>
+              <View style={styles.loadingDots}>
+                <Text style={styles.loadingDot}>•</Text>
+                <Text style={styles.loadingDot}>•</Text>
+                <Text style={styles.loadingDot}>•</Text>
+              </View>
             </View>
           ) : (
             <View style={styles.uploadContent}>
@@ -112,7 +138,7 @@ export const FileUploadCard: React.FC<Props> = ({
               </View>
               <Text style={styles.uploadText}>Upload Transit Data</Text>
               <Text style={styles.uploadSubtext}>
-                Upload your historical transit data files (CSV, Excel, JSON)
+                Upload your historical transit data files (CSV)
               </Text>
               <View style={styles.uploadHint}>
                 <Text style={styles.uploadHintText}>Tap to browse files</Text>
@@ -124,19 +150,42 @@ export const FileUploadCard: React.FC<Props> = ({
       
       {uploadedFiles.length > 0 && (
         <View style={styles.fileList}>
-          <Text style={styles.fileListTitle}>📋 Uploaded Files ({uploadedFiles.length})</Text>
-          {uploadedFiles.slice(-3).map((file, index) => (
-            <View key={index} style={styles.fileItem}>
-              <Text style={styles.fileIcon}>✅</Text>
-              <View style={styles.fileInfo}>
-                <Text style={styles.fileName}>{file.name}</Text>
-                <Text style={styles.fileDetails}>{file.size} MB • {file.rows?.toLocaleString()} rows</Text>
-              </View>
+          <View style={styles.fileListHeader}>
+            <View style={styles.fileListTitleContainer}>
+              <Text style={styles.fileListIcon}>📋</Text>
+              <Text style={styles.fileListTitle}>Uploaded Files</Text>
             </View>
-          ))}
-          {uploadedFiles.length > 3 && (
-            <Text style={styles.moreFiles}>+ {uploadedFiles.length - 3} more files</Text>
-          )}
+            <View style={styles.fileCountBadge}>
+              <Text style={styles.fileCountText}>{uploadedFiles.length}</Text>
+            </View>
+          </View>
+          
+          <View style={styles.fileItemsContainer}>
+            {uploadedFiles.slice(-3).map((file, index) => (
+              <View key={index} style={styles.fileItem}>
+                <View style={styles.fileIconContainer}>
+                  <Text style={styles.fileItemIcon}>✅</Text>
+                </View>
+                <View style={styles.fileInfo}>
+                  <Text style={styles.fileName}>{file.name}</Text>
+                  <View style={styles.fileDetailsContainer}>
+                    <View style={styles.fileSizeBadge}>
+                      <Text style={styles.fileSize}>{file.size} MB</Text>
+                    </View>
+                    <Text style={styles.fileDetailsSeparator}>•</Text>
+                    <Text style={styles.fileRows}>{file.rows?.toLocaleString()} rows</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+            
+            {uploadedFiles.length > 3 && (
+              <View style={styles.moreFilesContainer}>
+                <View style={styles.moreFilesDivider} />
+                <Text style={styles.moreFiles}>+ {uploadedFiles.length - 3} more files</Text>
+              </View>
+            )}
+          </View>
         </View>
       )}
     </View>
@@ -147,108 +196,182 @@ const styles = StyleSheet.create({
   uploadCard: {
     backgroundColor: 'white',
     margin: 15,
-    padding: 25,
-    borderRadius: 25,
+    padding: 24,
+    borderRadius: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-    elevation: 15,
-    borderLeftWidth: 6,
-    borderLeftColor: '#dc2626',
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+  },
+  cardTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#fef2f2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: '#fecaca',
+  },
+  cardIcon: {
+    fontSize: 20,
   },
   cardTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  cardHeaderActions: {
-    flexDirection: 'row',
-    gap: 8,
+    fontWeight: '800',
+    color: '#1e293b',
+    letterSpacing: 0.5,
   },
   viewDataButton: {
-    backgroundColor: '#fee2e2',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
+    backgroundColor: '#fef2f2',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    overflow: 'hidden',
+  },
+  viewDataButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  viewDataIcon: {
+    fontSize: 14,
+    marginRight: 6,
   },
   viewDataText: {
     color: '#dc2626',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 
   // Developer Options
   developerOptions: {
     marginBottom: 20,
   },
+  optionsTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  optionsDivider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e2e8f0',
+  },
   optionsTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 20,
-    textAlign: 'center',
+    fontWeight: '700',
+    color: '#64748b',
+    marginHorizontal: 16,
+    letterSpacing: 1,
   },
   optionCard: {
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  uploadOptionCard: {
+    backgroundColor: '#fef2f2',
     borderWidth: 2,
     borderColor: '#fecaca',
-    borderRadius: 20,
-    padding: 25,
-    marginBottom: 15,
-    backgroundColor: '#fef2f2',
+  },
+  simulationOptionCard: {
+    backgroundColor: '#eff6ff',
+    borderWidth: 2,
+    borderColor: '#bfdbfe',
   },
   optionContent: {
     alignItems: 'center',
   },
   optionIconContainer: {
-    marginBottom: 15,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
   optionIcon: {
-    fontSize: 40,
+    fontSize: 28,
   },
   optionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: '#1e293b',
     marginBottom: 8,
     textAlign: 'center',
+    letterSpacing: 0.5,
   },
   optionDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#64748b',
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
+    fontWeight: '500',
   },
   optionButton: {
     backgroundColor: '#dc2626',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 15,
+    paddingVertical: 12,
+    borderRadius: 16,
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   simulationButton: {
     backgroundColor: '#3b82f6',
+    shadowColor: '#3b82f6',
   },
   optionButtonText: {
     color: 'white',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    marginRight: 8,
+  },
+  optionButtonArrow: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 
   // Admin Upload Zone
   uploadZone: {
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: '#fecaca',
     borderStyle: 'dashed',
     borderRadius: 20,
-    padding: 40,
+    padding: 32,
     alignItems: 'center',
     backgroundColor: '#fef2f2',
   },
@@ -256,90 +379,197 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   uploadIconContainer: {
-    marginBottom: 15,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
   uploadIcon: {
-    fontSize: 48,
+    fontSize: 36,
   },
   uploadText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1e293b',
     marginBottom: 8,
+    letterSpacing: 0.5,
   },
   uploadSubtext: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 15,
+    color: '#64748b',
+    marginBottom: 20,
     textAlign: 'center',
     lineHeight: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
+    fontWeight: '500',
   },
   uploadHint: {
     backgroundColor: '#dc2626',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 16,
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   uploadHintText: {
     color: 'white',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
+    marginRight: 6,
+    letterSpacing: 0.5,
+  },
+  uploadHintArrow: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 
   // Loading state
   uploadLoading: {
     alignItems: 'center',
   },
+  loadingContainer: {
+    marginBottom: 16,
+  },
   uploadLoadingText: {
-    marginTop: 10,
     fontSize: 16,
-    color: '#666',
+    color: '#64748b',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  loadingDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  loadingDot: {
+    fontSize: 24,
+    color: '#dc2626',
+    marginHorizontal: 2,
   },
 
   // File list
   fileList: {
-    marginTop: 25,
+    marginTop: 24,
     padding: 20,
-    backgroundColor: '#f9fafb',
-    borderRadius: 15,
+    backgroundColor: '#f8fafc',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  fileListHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  fileListTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fileListIcon: {
+    fontSize: 16,
+    marginRight: 8,
   },
   fileListTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 15,
+    fontWeight: '700',
+    color: '#1e293b',
+    letterSpacing: 0.5,
+  },
+  fileCountBadge: {
+    backgroundColor: '#dc2626',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    minWidth: 24,
+    alignItems: 'center',
+  },
+  fileCountText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  fileItemsContainer: {
+    gap: 12,
   },
   fileItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    padding: 10,
+    padding: 16,
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  fileIcon: {
+  fileIconContainer: {
+    marginRight: 12,
+  },
+  fileItemIcon: {
     fontSize: 16,
-    marginRight: 10,
   },
   fileInfo: {
     flex: 1,
   },
   fileName: {
     fontSize: 14,
-    color: '#333',
+    color: '#1e293b',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  fileDetailsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fileSizeBadge: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  fileSize: {
+    fontSize: 11,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  fileDetailsSeparator: {
+    fontSize: 12,
+    color: '#94a3b8',
+    marginHorizontal: 8,
+  },
+  fileRows: {
+    fontSize: 12,
+    color: '#64748b',
     fontWeight: '500',
   },
-  fileDetails: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+  moreFilesContainer: {
+    alignItems: 'center',
+    paddingTop: 12,
+  },
+  moreFilesDivider: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#e2e8f0',
+    marginBottom: 12,
   },
   moreFiles: {
     fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
+    color: '#64748b',
+    fontWeight: '600',
     fontStyle: 'italic',
-    marginTop: 10,
   },
 });

@@ -1,8 +1,9 @@
-// index.tsx (Clean Version)
+// index.tsx (düzeltilmiş versiyon)
 import { styles } from './styles';
 
 import React, { useState } from 'react';
 import {
+  Dimensions,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -14,7 +15,6 @@ import {
 // Import our custom hooks and components
 import { LoginScreen } from './components/auth/LoginScreen';
 import { FileUploadCard } from './components/dashboard/FileUploadCard';
-import { WelcomeCard } from './components/dashboard/WelcomeCard';
 import { TestScreen } from './components/test/TestScreen';
 import { useAIProcess } from './hooks/useAIProcess';
 import { useAuth } from './hooks/useAuth';
@@ -34,6 +34,8 @@ import { AdminReportsScreen } from './components/admin/AdminReportsScreen';
 
 // Import types
 import { ModalState, ReportsState } from './types/app';
+
+const { width, height } = Dimensions.get('window');
 
 export default function HomeScreen() {
   // Use custom hooks
@@ -78,15 +80,15 @@ export default function HomeScreen() {
     }
   });
 
-  // Modal states (sadece dataViewer)
+  // Modal states
   const [modals, setModals] = useState<ModalState>({
-    notifications: false,
     fileUpload: false,
     dataViewer: false
   });
 
-  // Developer için simulation sayfasına yönlendirme
-  const goToSimulation = () => {
+  // Navigation handler for simulation
+  const handleGoToSimulation = () => {
+    console.log('Navigating to simulation...'); // Debug log
     setCurrentTab('simulation');
   };
 
@@ -105,8 +107,6 @@ export default function HomeScreen() {
   // Main Dashboard Content
   const renderDashboard = () => (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Welcome Card */}
-      <WelcomeCard user={user} />
 
       {/* File Upload Section */}
       <FileUploadCard
@@ -115,7 +115,7 @@ export default function HomeScreen() {
         user={user}
         onFileUpload={handleFileUpload}
         onViewData={() => setModals(prev => ({ ...prev, dataViewer: true }))}
-        onGoToSimulation={user.role === 'developer' ? goToSimulation : undefined}
+        onGoToSimulation={handleGoToSimulation} // Bu satırı ekledim!
       />
 
       {/* AI Process Control */}
@@ -226,22 +226,13 @@ export default function HomeScreen() {
               <Text style={styles.quickActionText}>ML Forecasting</Text>
               <Text style={styles.quickActionDesc}>Prophet & LSTM models</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.quickActionButton}
-              onPress={() => setCurrentTab('reports')}
-            >
-              <Text style={styles.quickActionIcon}>📋</Text>
-              <Text style={styles.quickActionText}>Reports</Text>
-              <Text style={styles.quickActionDesc}>Analytics & insights</Text>
-            </TouchableOpacity>
           </View>
         </View>
       )}
     </ScrollView>
   );
 
-  // renderContent function
+  // renderContent fonksiyonunu güncelleyin:
   const renderContent = () => {
     if (user?.role === 'admin') {
       if (currentTab === 'reports') {
@@ -257,7 +248,7 @@ export default function HomeScreen() {
       }
       return renderDashboard();
     } else {
-      // Developer view
+      // Developer view (mevcut kod aynı kalacak)
       switch (currentTab) {
         case 'dashboard':
           return renderDashboard();
@@ -296,27 +287,27 @@ export default function HomeScreen() {
               setReports={setReports}
             />
           );
-        case 'test':
-          return <TestScreen />;
         default:
           return renderDashboard();
+
+        case 'test':
+          return <TestScreen />;
       }
     }
   };
 
   return (
     <View style={styles.app}>
-      {/* Header */}
       <View style={styles.appHeader}>
         <SafeAreaView>
           <View style={styles.headerContent}>
             <View style={styles.userInfo}>
-              <Text style={styles.userName}>Welcome, {user.username}</Text>
-              <Text style={styles.userRole}>
-                {user.role === 'admin' ? '👑 Administrator' : '⚙️ Developer'}
-              </Text>
-            </View>
-            <View style={styles.headerButtons}>
+              <View style={styles.userDetails}>
+                <Text style={styles.userName}>Welcome, {user.username}</Text>
+                <Text style={styles.userRole}>
+                  {user.role === 'admin' ? '👑 Administrator' : '⚙️ Developer'}
+                </Text>
+              </View>
               <TouchableOpacity 
                 style={styles.headerButton}
                 onPress={handleLogout}
@@ -393,11 +384,20 @@ export default function HomeScreen() {
         animationType="slide"
         onRequestClose={() => setModals(prev => ({ ...prev, dataViewer: false }))}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setModals(prev => ({ ...prev, dataViewer: false }))}
+        >
+          <TouchableOpacity 
+            style={styles.modalContent}
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>📊 Data Overview</Text>
               <TouchableOpacity
+                style={styles.modalCloseButton}
                 onPress={() => setModals(prev => ({ ...prev, dataViewer: false }))}
               >
                 <Text style={styles.modalClose}>✕</Text>
@@ -420,8 +420,17 @@ export default function HomeScreen() {
                 <Text style={styles.noDataText}>No data files uploaded yet</Text>
               )}
             </ScrollView>
-          </View>
-        </View>
+            
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={styles.modalBackButton}
+                onPress={() => setModals(prev => ({ ...prev, dataViewer: false }))}
+              >
+                <Text style={styles.modalBackText}>← Back to Dashboard</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
     </View>
   );

@@ -1,13 +1,12 @@
 // components/developer/OptimizationScreen.tsx
 import React from 'react';
 import {
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { OptimizationState, UploadedFile } from '../../types/app';
 
@@ -33,53 +32,11 @@ export const OptimizationScreen: React.FC<Props> = ({
         <Text style={styles.sectionSubtitle}>Advanced multi-objective optimization system</Text>
       </View>
 
-      <View style={styles.parameterCard}>
-        <Text style={styles.cardTitle}>⚙️ Algorithm Parameters</Text>
-        
-        <View style={styles.parameterGrid}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Population Size</Text>
-            <TextInput
-              style={styles.numberInput}
-              value={optimization.populationSize}
-              onChangeText={(text) => setOptimization(prev => ({ ...prev, populationSize: text }))}
-              keyboardType="numeric"
-            />
-            <Text style={styles.inputHint}>Recommended: 20-50</Text>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Max Generations</Text>
-            <TextInput
-              style={styles.numberInput}
-              value={optimization.maxGenerations}
-              onChangeText={(text) => setOptimization(prev => ({ ...prev, maxGenerations: text }))}
-              keyboardType="numeric"
-            />
-            <Text style={styles.inputHint}>Typical: 30-100</Text>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Mutation Rate</Text>
-            <TextInput
-              style={styles.numberInput}
-              value={optimization.mutationRate.toString()}
-              onChangeText={(text) => setOptimization(prev => ({ ...prev, mutationRate: parseFloat(text) || 0.05 }))}
-              keyboardType="numeric"
-            />
-            <Text style={styles.inputHint}>Range: 0.01-0.1</Text>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Crossover Rate</Text>
-            <TextInput
-              style={styles.numberInput}
-              value={optimization.crossoverRate.toString()}
-              onChangeText={(text) => setOptimization(prev => ({ ...prev, crossoverRate: parseFloat(text) || 0.8 }))}
-              keyboardType="numeric"
-            />
-            <Text style={styles.inputHint}>Range: 0.6-0.9</Text>
-          </View>
+      <View style={styles.startCard}>
+        <View style={styles.algorithmDescription}>
+          <Text style={styles.descriptionText}>
+            🎯 Multi-objective genetic algorithm optimizing route efficiency, wait times, and passenger satisfaction simultaneously.
+          </Text>
         </View>
 
         <TouchableOpacity
@@ -92,7 +49,7 @@ export const OptimizationScreen: React.FC<Props> = ({
               {optimization.isRunning ? '⏳' : '🚀'}
             </Text>
             <Text style={styles.primaryButtonText}>
-              {optimization.isRunning ? 'Optimization Running...' : 'Start Optimization'}
+              {optimization.isRunning ? 'Optimization Running...' : 'Start Genetic Optimization'}
             </Text>
           </View>
         </TouchableOpacity>
@@ -118,19 +75,18 @@ export const OptimizationScreen: React.FC<Props> = ({
           </View>
           <View style={styles.optimizationDetails}>
             <Text style={styles.detailItem}>
-              Current Fitness: {optimization.fitnessHistory[optimization.fitnessHistory.length - 1]?.toFixed(2) || 'N/A'}
+              🧬 Evolving population for optimal route configurations
             </Text>
             <Text style={styles.detailItem}>
-              Best Fitness: {Math.max(...optimization.fitnessHistory).toFixed(2) || 'N/A'}
+              📊 Current Fitness: {optimization.fitnessHistory[optimization.fitnessHistory.length - 1]?.toFixed(2) || 'Calculating...'}
             </Text>
             <Text style={styles.detailItem}>
-              ETA: {Math.max(0, parseInt(optimization.maxGenerations) - optimization.generation) * 0.2} seconds
+              ⏱️ ETA: {Math.max(0, parseInt(optimization.maxGenerations) - optimization.generation) * 0.2} seconds
             </Text>
           </View>
         </View>
       )}
 
-      {/* Fitness History Chart */}
       {optimization.fitnessHistory.length > 0 && (
         <View style={styles.chartCard}>
           <Text style={styles.cardTitle}>📊 Fitness Evolution</Text>
@@ -189,7 +145,7 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
-  parameterCard: {
+  startCard: {
     backgroundColor: 'white',
     margin: 15,
     padding: 25,
@@ -202,37 +158,19 @@ const styles = StyleSheet.create({
     borderLeftWidth: 6,
     borderLeftColor: '#dc2626',
   },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
-  },
-  parameterGrid: {
+  algorithmDescription: {
+    backgroundColor: '#fef3c7',
+    padding: 20,
+    borderRadius: 15,
     marginBottom: 25,
+    borderLeftWidth: 4,
+    borderLeftColor: '#f59e0b',
   },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  inputLabel: {
+  descriptionText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 10,
-  },
-  numberInput: {
-    backgroundColor: '#fef2f2',
-    borderRadius: 12,
-    padding: 15,
-    fontSize: 16,
-    borderWidth: 2,
-    borderColor: '#fecaca',
-  },
-  inputHint: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5,
-    fontStyle: 'italic',
+    color: '#92400e',
+    lineHeight: 22,
+    textAlign: 'center',
   },
   primaryButton: {
     backgroundColor: '#dc2626',
@@ -285,6 +223,12 @@ const styles = StyleSheet.create({
     elevation: 10,
     borderLeftWidth: 6,
     borderLeftColor: '#dc2626',
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
   },
   progressInfo: {
     flexDirection: 'row',

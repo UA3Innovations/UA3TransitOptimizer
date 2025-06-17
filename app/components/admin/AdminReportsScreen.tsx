@@ -1,7 +1,6 @@
 // components/admin/AdminReportsScreen.tsx
 import React from 'react';
 import {
-  ActivityIndicator,
   Dimensions,
   ScrollView,
   StyleSheet,
@@ -224,57 +223,6 @@ export const AdminReportsScreen: React.FC<Props> = ({
             </View>
           </View>
         </View>
-      </View>
-
-      {/* Quick Actions */}
-      <View style={styles.reportCard}>
-        <Text style={styles.cardTitle}>🚀 Quick Actions</Text>
-        <View style={styles.quickReportActions}>
-          <TouchableOpacity 
-            style={styles.reportActionButton}
-            onPress={async () => {
-              setReports(prev => ({ ...prev, isGenerating: true }));
-              await new Promise(resolve => setTimeout(resolve, 1500));
-              setReports(prev => ({ ...prev, isGenerating: false }));
-            }}
-          >
-            <Text style={styles.reportActionIcon}>📊</Text>
-            <Text style={styles.reportActionText}>Weekly Summary</Text>
-            <Text style={styles.reportActionDesc}>Comprehensive report</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.reportActionButton}
-            onPress={async () => {
-              setReports(prev => ({ ...prev, isGenerating: true }));
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              setReports(prev => ({ ...prev, isGenerating: false }));
-              
-              // Quick daily report
-              const dailyReport = `Daily Transit Report - ${new Date().toLocaleDateString()}
-              
-Average Wait Time: ${metrics.avgWaitTime} minutes
-Fleet Utilization: ${metrics.occupancyRate}%
-On-Time Performance: ${metrics.onTimePerf}%
-Files Processed: ${uploadedFiles.length}
-
-Status: ${metrics.onTimePerf >= 95 ? 'Excellent' : metrics.onTimePerf >= 90 ? 'Good' : 'Needs Attention'}`;
-              
-              console.log('Daily report generated:', dailyReport);
-            }}
-          >
-            <Text style={styles.reportActionIcon}>📅</Text>
-            <Text style={styles.reportActionText}>Daily Report</Text>
-            <Text style={styles.reportActionDesc}>Quick overview</Text>
-          </TouchableOpacity>
-        </View>
-        
-        {reports.isGenerating && (
-          <View style={styles.reportGenerating}>
-            <ActivityIndicator color="#dc2626" />
-            <Text style={styles.reportGeneratingText}>Generating report...</Text>
-          </View>
-        )}
       </View>
     </ScrollView>
   );
@@ -546,54 +494,4 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Quick Report Actions
-  quickReportActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 15,
-  },
-  reportActionButton: {
-    flex: 1,
-    backgroundColor: '#16a34a',
-    padding: 20,
-    borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: '#16a34a',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  reportActionIcon: {
-    fontSize: 28,
-    marginBottom: 8,
-    color: 'white',
-  },
-  reportActionText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  reportActionDesc: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  reportGenerating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#fee2e2',
-    borderRadius: 10,
-  },
-  reportGeneratingText: {
-    marginLeft: 10,
-    fontSize: 14,
-    color: '#dc2626',
-    fontWeight: '500',
-  },
 });

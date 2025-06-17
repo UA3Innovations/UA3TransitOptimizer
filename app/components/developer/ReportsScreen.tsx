@@ -1,8 +1,6 @@
 // components/developer/ReportsScreen.tsx
 import React from 'react';
 import {
-  ActivityIndicator,
-  Alert,
   Dimensions,
   ScrollView,
   StyleSheet,
@@ -33,13 +31,25 @@ export const ReportsScreen: React.FC<Props> = ({
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>📋 Performance Reports</Text>
-        <Text style={styles.sectionSubtitle}>Simple analytics and insights for developers</Text>
+        <View style={styles.headerIconContainer}>
+          <Text style={styles.headerIcon}>📋</Text>
+        </View>
+        <Text style={styles.sectionTitle}>Performance Reports</Text>
+        <View style={styles.sectionSubtitleContainer}>
+          <View style={styles.subtitleLine} />
+          <Text style={styles.sectionSubtitle}>Analytics & Insights for Developers</Text>
+          <View style={styles.subtitleLine} />
+        </View>
       </View>
 
       {/* Period Selection */}
       <View style={styles.reportCard}>
-        <Text style={styles.cardTitle}>📅 Report Period</Text>
+        <View style={styles.cardTitleContainer}>
+          <View style={styles.cardIconContainer}>
+            <Text style={styles.cardIcon}>📅</Text>
+          </View>
+          <Text style={styles.cardTitle}>Report Period</Text>
+        </View>
         <View style={styles.periodSelector}>
           {['Today', 'Week', 'Month'].map((period) => (
             <TouchableOpacity
@@ -63,69 +73,99 @@ export const ReportsScreen: React.FC<Props> = ({
 
       {/* Key Metrics Summary */}
       <View style={styles.reportCard}>
-        <Text style={styles.cardTitle}>🎯 Performance Summary</Text>
+        <View style={styles.cardTitleContainer}>
+          <View style={styles.cardIconContainer}>
+            <Text style={styles.cardIcon}>🎯</Text>
+          </View>
+          <Text style={styles.cardTitle}>Performance Summary</Text>
+        </View>
         <View style={styles.adminMetricsGrid}>
           <View style={styles.adminMetricCard}>
-            <Text style={styles.adminMetricIcon}>⏱️</Text>
+            <View style={styles.metricIconContainer}>
+              <Text style={styles.adminMetricIcon}>⏱️</Text>
+            </View>
             <Text style={styles.adminMetricValue}>{metrics.avgWaitTime}m</Text>
             <Text style={styles.adminMetricLabel}>Avg Wait</Text>
-            <Text style={[styles.adminMetricTrend, styles.trendGood]}>↓ 12%</Text>
+            <View style={styles.trendContainer}>
+              <Text style={[styles.adminMetricTrend, styles.trendGood]}>↓ 12%</Text>
+            </View>
           </View>
           
           <View style={styles.adminMetricCard}>
-            <Text style={styles.adminMetricIcon}>🚌</Text>
+            <View style={styles.metricIconContainer}>
+              <Text style={styles.adminMetricIcon}>🚌</Text>
+            </View>
             <Text style={styles.adminMetricValue}>{metrics.occupancyRate}%</Text>
             <Text style={styles.adminMetricLabel}>Utilization</Text>
-            <Text style={[styles.adminMetricTrend, styles.trendGood]}>↑ 8%</Text>
+            <View style={styles.trendContainer}>
+              <Text style={[styles.adminMetricTrend, styles.trendGood]}>↑ 8%</Text>
+            </View>
           </View>
           
           <View style={styles.adminMetricCard}>
-            <Text style={styles.adminMetricIcon}>🎯</Text>
+            <View style={styles.metricIconContainer}>
+              <Text style={styles.adminMetricIcon}>🎯</Text>
+            </View>
             <Text style={styles.adminMetricValue}>{metrics.onTimePerf}%</Text>
             <Text style={styles.adminMetricLabel}>On-Time</Text>
-            <Text style={[styles.adminMetricTrend, styles.trendGood]}>↑ 5%</Text>
+            <View style={styles.trendContainer}>
+              <Text style={[styles.adminMetricTrend, styles.trendGood]}>↑ 5%</Text>
+            </View>
           </View>
           
           <View style={styles.adminMetricCard}>
-            <Text style={styles.adminMetricIcon}>👥</Text>
+            <View style={styles.metricIconContainer}>
+              <Text style={styles.adminMetricIcon}>👥</Text>
+            </View>
             <Text style={styles.adminMetricValue}>24.8K</Text>
             <Text style={styles.adminMetricLabel}>Passengers</Text>
-            <Text style={[styles.adminMetricTrend, styles.trendGood]}>↑ 15%</Text>
+            <View style={styles.trendContainer}>
+              <Text style={[styles.adminMetricTrend, styles.trendGood]}>↑ 15%</Text>
+            </View>
           </View>
         </View>
       </View>
 
       {/* Simple Performance Chart */}
       <View style={styles.reportCard}>
-        <Text style={styles.cardTitle}>📈 Performance Trend (Last 7 Days)</Text>
-        <View style={styles.simpleChart}>
-          {reports.chartData.daily.map((day, index) => {
-            const performance = day.onTime;
-            const isGood = performance >= 95;
-            const isOk = performance >= 90;
-            
-            return (
-              <View key={index} style={styles.chartColumn}>
-                <View style={styles.chartBar}>
-                  <View 
-                    style={[
-                      styles.chartBarFill, 
-                      { 
-                        height: `${performance}%`,
-                        backgroundColor: isGood ? '#16a34a' : isOk ? '#f59e0b' : '#dc2626'
-                      }
-                    ]} 
-                  />
-                </View>
-                <Text style={styles.chartLabel}>{day.name}</Text>
-                <Text style={[styles.chartValue, {
-                  color: isGood ? '#16a34a' : isOk ? '#f59e0b' : '#dc2626'
-                }]}>{performance}%</Text>
-              </View>
-            );
-          })}
+        <View style={styles.cardTitleContainer}>
+          <View style={styles.cardIconContainer}>
+            <Text style={styles.cardIcon}>📈</Text>
+          </View>
+          <Text style={styles.cardTitle}>Performance Trend (Last 7 Days)</Text>
         </View>
-        <Text style={styles.chartDescription}>On-time performance by day</Text>
+        <View style={styles.chartContainer}>
+          <View style={styles.simpleChart}>
+            {reports.chartData.daily.map((day, index) => {
+              const performance = day.onTime;
+              const isGood = performance >= 95;
+              const isOk = performance >= 90;
+              
+              return (
+                <View key={index} style={styles.chartColumn}>
+                  <View style={styles.chartBar}>
+                    <View 
+                      style={[
+                        styles.chartBarFill, 
+                        { 
+                          height: `${performance}%`,
+                          backgroundColor: isGood ? '#16a34a' : isOk ? '#f59e0b' : '#dc2626'
+                        }
+                      ]} 
+                    />
+                  </View>
+                  <Text style={styles.chartLabel}>{day.name}</Text>
+                  <View style={styles.chartValueContainer}>
+                    <Text style={[styles.chartValue, {
+                      color: isGood ? '#16a34a' : isOk ? '#f59e0b' : '#dc2626'
+                    }]}>{performance}%</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+          <Text style={styles.chartDescription}>On-time performance by day</Text>
+        </View>
         
         <View style={styles.chartLegend}>
           <View style={styles.legendItem}>
@@ -145,42 +185,58 @@ export const ReportsScreen: React.FC<Props> = ({
 
       {/* Wait Time Analysis */}
       <View style={styles.reportCard}>
-        <Text style={styles.cardTitle}>⏱️ Wait Time Analysis</Text>
-        <View style={styles.waitTimeChart}>
-          {reports.chartData.daily.map((day, index) => {
-            const waitTime = day.waitTime;
-            const barHeight = (waitTime / 10) * 100; // Max 10 minutes scale
-            
-            return (
-              <View key={index} style={styles.waitTimeColumn}>
-                <View style={styles.waitTimeBar}>
-                  <View 
-                    style={[
-                      styles.waitTimeBarFill, 
-                      { 
-                        height: `${Math.min(barHeight, 100)}%`,
-                        backgroundColor: waitTime <= 7 ? '#16a34a' : waitTime <= 9 ? '#f59e0b' : '#dc2626'
-                      }
-                    ]} 
-                  />
-                </View>
-                <Text style={styles.chartLabel}>{day.name}</Text>
-                <Text style={styles.waitTimeValue}>{waitTime}m</Text>
-              </View>
-            );
-          })}
+        <View style={styles.cardTitleContainer}>
+          <View style={styles.cardIconContainer}>
+            <Text style={styles.cardIcon}>⏱️</Text>
+          </View>
+          <Text style={styles.cardTitle}>Wait Time Analysis</Text>
         </View>
-        <Text style={styles.chartDescription}>Average passenger wait time by day</Text>
+        <View style={styles.chartContainer}>
+          <View style={styles.waitTimeChart}>
+            {reports.chartData.daily.map((day, index) => {
+              const waitTime = day.waitTime;
+              const barHeight = (waitTime / 10) * 100; // Max 10 minutes scale
+              
+              return (
+                <View key={index} style={styles.waitTimeColumn}>
+                  <View style={styles.waitTimeBar}>
+                    <View 
+                      style={[
+                        styles.waitTimeBarFill, 
+                        { 
+                          height: `${Math.min(barHeight, 100)}%`,
+                          backgroundColor: waitTime <= 7 ? '#16a34a' : waitTime <= 9 ? '#f59e0b' : '#dc2626'
+                        }
+                      ]} 
+                    />
+                  </View>
+                  <Text style={styles.chartLabel}>{day.name}</Text>
+                  <View style={styles.waitTimeValueContainer}>
+                    <Text style={styles.waitTimeValue}>{waitTime}m</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+          <Text style={styles.chartDescription}>Average passenger wait time by day</Text>
+        </View>
       </View>
 
       {/* Key Insights */}
       <View style={styles.insightsCard}>
-        <Text style={styles.cardTitle}>💡 Key Insights</Text>
+        <View style={styles.cardTitleContainer}>
+          <View style={[styles.cardIconContainer, styles.insightsCardIconContainer]}>
+            <Text style={styles.cardIcon}>💡</Text>
+          </View>
+          <Text style={styles.cardTitle}>Key Insights</Text>
+        </View>
         <View style={styles.insightsList}>
           <View style={styles.insightItem}>
-            <Text style={styles.insightIcon}>
-              {metrics.onTimePerf >= 95 ? '✅' : metrics.onTimePerf >= 90 ? '⚠️' : '❌'}
-            </Text>
+            <View style={styles.insightIconContainer}>
+              <Text style={styles.insightIcon}>
+                {metrics.onTimePerf >= 95 ? '✅' : metrics.onTimePerf >= 90 ? '⚠️' : '❌'}
+              </Text>
+            </View>
             <View style={styles.insightContent}>
               <Text style={styles.insightTitle}>On-Time Performance</Text>
               <Text style={styles.insightText}>
@@ -194,9 +250,11 @@ export const ReportsScreen: React.FC<Props> = ({
           </View>
 
           <View style={styles.insightItem}>
-            <Text style={styles.insightIcon}>
-              {metrics.avgWaitTime <= 7 ? '✅' : metrics.avgWaitTime <= 9 ? '⚠️' : '❌'}
-            </Text>
+            <View style={styles.insightIconContainer}>
+              <Text style={styles.insightIcon}>
+                {metrics.avgWaitTime <= 7 ? '✅' : metrics.avgWaitTime <= 9 ? '⚠️' : '❌'}
+              </Text>
+            </View>
             <View style={styles.insightContent}>
               <Text style={styles.insightTitle}>Wait Times</Text>
               <Text style={styles.insightText}>
@@ -210,9 +268,11 @@ export const ReportsScreen: React.FC<Props> = ({
           </View>
 
           <View style={styles.insightItem}>
-            <Text style={styles.insightIcon}>
-              {metrics.occupancyRate >= 60 && metrics.occupancyRate <= 75 ? '✅' : '⚠️'}
-            </Text>
+            <View style={styles.insightIconContainer}>
+              <Text style={styles.insightIcon}>
+                {metrics.occupancyRate >= 60 && metrics.occupancyRate <= 75 ? '✅' : '⚠️'}
+              </Text>
+            </View>
             <View style={styles.insightContent}>
               <Text style={styles.insightTitle}>Fleet Utilization</Text>
               <Text style={styles.insightText}>
@@ -226,47 +286,6 @@ export const ReportsScreen: React.FC<Props> = ({
           </View>
         </View>
       </View>
-
-      {/* Quick Actions */}
-      <View style={styles.reportCard}>
-        <Text style={styles.cardTitle}>🚀 Quick Actions</Text>
-        <View style={styles.quickReportActions}>
-          <TouchableOpacity 
-            style={styles.reportActionButton}
-            onPress={async () => {
-              setReports(prev => ({ ...prev, isGenerating: true }));
-              await new Promise(resolve => setTimeout(resolve, 1500));
-              setReports(prev => ({ ...prev, isGenerating: false }));
-              Alert.alert('Summary', 'Weekly summary generated successfully');
-            }}
-          >
-            <Text style={styles.reportActionIcon}>📊</Text>
-            <Text style={styles.reportActionText}>Weekly Summary</Text>
-            <Text style={styles.reportActionDesc}>Generate overview</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.reportActionButton}
-            onPress={async () => {
-              setReports(prev => ({ ...prev, isGenerating: true }));
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              setReports(prev => ({ ...prev, isGenerating: false }));
-              Alert.alert('Daily Report', 'Daily report generated successfully');
-            }}
-          >
-            <Text style={styles.reportActionIcon}>📅</Text>
-            <Text style={styles.reportActionText}>Daily Report</Text>
-            <Text style={styles.reportActionDesc}>Quick overview</Text>
-          </TouchableOpacity>
-        </View>
-        
-        {reports.isGenerating && (
-          <View style={styles.reportGenerating}>
-            <ActivityIndicator color="#dc2626" />
-            <Text style={styles.reportGeneratingText}>Generating report...</Text>
-          </View>
-        )}
-      </View>
     </ScrollView>
   );
 };
@@ -279,69 +298,124 @@ const styles = StyleSheet.create({
   sectionHeader: {
     backgroundColor: 'white',
     margin: 15,
-    padding: 25,
-    borderRadius: 25,
+    padding: 28,
+    borderRadius: 24,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
-    borderLeftWidth: 6,
-    borderLeftColor: '#dc2626',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  headerIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#fef2f2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#fecaca',
+  },
+  headerIcon: {
+    fontSize: 28,
   },
   sectionTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#1e293b',
+    marginBottom: 16,
     textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+  sectionSubtitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  subtitleLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e2e8f0',
   },
   sectionSubtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 14,
+    color: '#64748b',
     textAlign: 'center',
+    fontWeight: '600',
+    marginHorizontal: 16,
+    letterSpacing: 0.5,
   },
   reportCard: {
     backgroundColor: 'white',
     margin: 15,
-    padding: 25,
-    borderRadius: 25,
+    padding: 24,
+    borderRadius: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
-    borderLeftWidth: 6,
-    borderLeftColor: '#dc2626',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  cardTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  cardIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fef2f2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+  },
+  cardIcon: {
+    fontSize: 18,
   },
   cardTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
+    fontWeight: '800',
+    color: '#1e293b',
+    letterSpacing: 0.5,
   },
 
   // Period Selector
   periodSelector: {
     flexDirection: 'row',
-    backgroundColor: '#f1f5f9',
-    borderRadius: 12,
-    padding: 4,
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 6,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   periodButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 14,
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: 12,
   },
   periodButtonActive: {
     backgroundColor: '#dc2626',
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   periodButtonText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
+    fontWeight: '700',
+    color: '#64748b',
+    letterSpacing: 0.5,
   },
   periodButtonTextActive: {
     color: 'white',
@@ -352,38 +426,59 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: 12,
   },
   adminMetricCard: {
-    width: (width - 80) / 2,
+    width: (width - 86) / 2,
     backgroundColor: '#f8fafc',
     padding: 20,
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: 'center',
-    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  metricIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
   adminMetricIcon: {
-    fontSize: 28,
-    marginBottom: 10,
+    fontSize: 20,
   },
   adminMetricValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '800',
     color: '#dc2626',
-    marginBottom: 5,
+    marginBottom: 6,
+    letterSpacing: 0.5,
   },
   adminMetricLabel: {
     fontSize: 12,
     color: '#64748b',
-    marginBottom: 5,
-    textTransform: 'uppercase',
+    marginBottom: 8,
+    fontWeight: '700',
     letterSpacing: 1,
-    fontWeight: '600',
+  },
+  trendContainer: {
+    backgroundColor: 'rgba(22, 163, 74, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
   adminMetricTrend: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   trendGood: {
     color: '#16a34a',
@@ -392,72 +487,93 @@ const styles = StyleSheet.create({
     color: '#dc2626',
   },
 
+  // Chart Container
+  chartContainer: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 16,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+
   // Simple Chart
   simpleChart: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    height: 140,
-    paddingHorizontal: 10,
-    marginVertical: 20,
+    height: 120,
+    paddingHorizontal: 8,
+    marginBottom: 16,
   },
   chartColumn: {
     alignItems: 'center',
     flex: 1,
   },
   chartBar: {
-    width: 24,
-    height: 100,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 12,
+    width: 20,
+    height: 80,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 10,
     justifyContent: 'flex-end',
     marginBottom: 8,
   },
   chartBarFill: {
-    borderRadius: 12,
-    minHeight: 8,
+    borderRadius: 10,
+    minHeight: 4,
   },
   chartLabel: {
     fontSize: 11,
     color: '#64748b',
     marginTop: 6,
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  chartValueContainer: {
+    backgroundColor: 'white',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   chartValue: {
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 2,
+    fontSize: 10,
+    fontWeight: '700',
   },
   chartDescription: {
     textAlign: 'center',
     fontSize: 13,
     color: '#64748b',
     fontStyle: 'italic',
-    marginBottom: 15,
+    fontWeight: '500',
   },
 
   // Chart Legend
   chartLegend: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#f8fafc',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#f1f5f9',
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     marginRight: 6,
   },
   legendText: {
     fontSize: 11,
     color: '#64748b',
-    fontWeight: '500',
+    fontWeight: '600',
   },
 
   // Wait Time Chart
@@ -465,126 +581,105 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    height: 120,
-    paddingHorizontal: 10,
-    marginVertical: 20,
+    height: 100,
+    paddingHorizontal: 8,
+    marginBottom: 16,
   },
   waitTimeColumn: {
     alignItems: 'center',
     flex: 1,
   },
   waitTimeBar: {
-    width: 22,
-    height: 80,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 11,
+    width: 18,
+    height: 60,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 9,
     justifyContent: 'flex-end',
     marginBottom: 8,
   },
   waitTimeBarFill: {
-    borderRadius: 11,
-    minHeight: 6,
+    borderRadius: 9,
+    minHeight: 3,
+  },
+  waitTimeValueContainer: {
+    backgroundColor: 'white',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   waitTimeValue: {
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 2,
-    color: '#333',
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#1e293b',
   },
 
   // Insights
   insightsCard: {
     backgroundColor: 'white',
     margin: 15,
-    padding: 25,
-    borderRadius: 25,
+    padding: 24,
+    borderRadius: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
-    borderLeftWidth: 6,
-    borderLeftColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  insightsCardIconContainer: {
+    backgroundColor: '#eff6ff',
+    borderColor: '#bfdbfe',
   },
   insightsList: {
-    marginTop: 10,
+    marginTop: 8,
+    gap: 12,
   },
   insightItem: {
     flexDirection: 'row',
     backgroundColor: '#f8fafc',
-    padding: 18,
-    borderRadius: 15,
-    marginBottom: 15,
+    padding: 20,
+    borderRadius: 16,
     alignItems: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  insightIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   insightIcon: {
-    fontSize: 24,
-    marginRight: 15,
-    marginTop: 2,
+    fontSize: 18,
   },
   insightContent: {
     flex: 1,
   },
   insightTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#334155',
+    fontWeight: '700',
+    color: '#1e293b',
     marginBottom: 6,
+    letterSpacing: 0.3,
   },
   insightText: {
     fontSize: 14,
     color: '#64748b',
     lineHeight: 20,
-  },
-
-  // Quick Report Actions
-  quickReportActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 15,
-  },
-  reportActionButton: {
-    flex: 1,
-    backgroundColor: '#16a34a',
-    padding: 20,
-    borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: '#16a34a',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  reportActionIcon: {
-    fontSize: 28,
-    marginBottom: 8,
-    color: 'white',
-  },
-  reportActionText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  reportActionDesc: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  reportGenerating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#fee2e2',
-    borderRadius: 10,
-  },
-  reportGeneratingText: {
-    marginLeft: 10,
-    fontSize: 14,
-    color: '#dc2626',
     fontWeight: '500',
   },
 });

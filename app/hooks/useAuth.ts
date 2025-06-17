@@ -80,32 +80,78 @@ export const useAuth = () => {
     }
   };
 
-  // Enhanced logout function
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Yes',
-          onPress: async () => {
-            try {
-              if (Platform.OS !== 'web') {
-                await SecureStore.deleteItemAsync('user');
-              }
-              setUser(null);
-              setLoginData({ username: '', password: '', role: 'admin' });
-            } catch (error) {
-              console.log('Error clearing stored data (continuing anyway)');
-              // Still logout even if SecureStore fails
-              setUser(null);
-              setLoginData({ username: '', password: '', role: 'admin' });
-            }
-          }
+  // Düzeltilmiş logout fonksiyonu
+  const handleLogout = async () => {
+    console.log('Logout button pressed'); // Debug log
+    
+    try {
+      // Platform kontrolü ile Alert kullanımı
+      if (Platform.OS === 'web') {
+        // Web için basit confirm kullan
+        const confirmLogout = window.confirm('Are you sure you want to logout?');
+        if (confirmLogout) {
+          await performLogout();
         }
-      ]
-    );
+      } else {
+        // Mobil için Alert kullan
+        Alert.alert(
+          'Logout',
+          'Are you sure you want to logout?',
+          [
+            { 
+              text: 'Cancel', 
+              style: 'cancel',
+              onPress: () => console.log('Logout cancelled')
+            },
+            {
+              text: 'Yes',
+              style: 'destructive',
+              onPress: async () => {
+                console.log('Logout confirmed');
+                await performLogout();
+              }
+            }
+          ],
+          { cancelable: true }
+        );
+      }
+    } catch (error) {
+      console.log('Error in handleLogout:', error);
+      // Hata durumunda direkt çıkış yap
+      await performLogout();
+    }
+  };
+
+  // Çıkış işlemini gerçekleştiren ayrı fonksiyon
+  const performLogout = async () => {
+    try {
+      console.log('Performing logout...');
+      
+      // SecureStore'dan temizle
+      if (Platform.OS !== 'web') {
+        await SecureStore.deleteItemAsync('user');
+        console.log('SecureStore cleared');
+      }
+      
+      // State'leri sıfırla
+      setUser(null);
+      setLoginData({ username: '', password: '', role: 'admin' });
+      setLoginError('');
+      
+      console.log('Logout completed successfully');
+    } catch (error) {
+      console.log('Error during logout (continuing anyway):', error);
+      // Hata olsa bile çıkış yap
+      setUser(null);
+      setLoginData({ username: '', password: '', role: 'admin' });
+      setLoginError('');
+    }
+  };
+
+  // Acil çıkış fonksiyonu (Alert olmadan direkt çıkış)
+  const forceLogout = async () => {
+    console.log('Force logout initiated');
+    await performLogout();
   };
 
   // Auto-login check on startup
@@ -119,6 +165,7 @@ export const useAuth = () => {
     setLoginData,
     loginError,
     handleLogin,
-    handleLogout
+    handleLogout,
+    forceLogout // Acil durum için ek fonksiyon
   };
 };

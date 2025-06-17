@@ -88,7 +88,6 @@ export interface ReportsState {
 }
 
 export interface ModalState {
-  notifications: boolean;
   fileUpload: boolean;
   dataViewer: boolean;
 }
