@@ -1,9 +1,8 @@
-// index.tsx (tüm developer sayfaları ile güncellenmiş)
+// index.tsx (Clean Version)
 import { styles } from './styles';
 
 import React, { useState } from 'react';
 import {
-  Dimensions,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -15,7 +14,6 @@ import {
 // Import our custom hooks and components
 import { LoginScreen } from './components/auth/LoginScreen';
 import { FileUploadCard } from './components/dashboard/FileUploadCard';
-import { MetricsCard } from './components/dashboard/MetricsCard';
 import { WelcomeCard } from './components/dashboard/WelcomeCard';
 import { TestScreen } from './components/test/TestScreen';
 import { useAIProcess } from './hooks/useAIProcess';
@@ -33,12 +31,9 @@ import { ReportsScreen } from './components/developer/ReportsScreen';
 import { SimulationScreen } from './components/developer/SimulationScreen';
 
 import { AdminReportsScreen } from './components/admin/AdminReportsScreen';
-import { PDFExporter } from './services/export/pdfExporter';
 
 // Import types
 import { ModalState, ReportsState } from './types/app';
-
-const { width, height } = Dimensions.get('window');
 
 export default function HomeScreen() {
   // Use custom hooks
@@ -53,7 +48,6 @@ export default function HomeScreen() {
 
   // App State
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
-
 
   // Reports state
   const [reports, setReports] = useState<ReportsState>({
@@ -84,43 +78,17 @@ export default function HomeScreen() {
     }
   });
 
-  // Modal states
+  // Modal states (sadece dataViewer)
   const [modals, setModals] = useState<ModalState>({
     notifications: false,
     fileUpload: false,
     dataViewer: false
   });
 
-  // Enhanced PDF export function
-  const exportToPDF = async () => {
-    await PDFExporter.exportToPDF({
-      user: user!,
-      metrics,
-      uploadedFiles,
-      optimization,
-      simulation,
-      forecasting
-    });
+  // Developer için simulation sayfasına yönlendirme
+  const goToSimulation = () => {
+    setCurrentTab('simulation');
   };
-
-  // Admin için basit rapor export
-  const exportAdminReport = async () => {
-    await PDFExporter.exportAdminReport({
-      user: user!,
-      metrics,
-      uploadedFiles
-    });
-  };
-
-  // Export simple report function
-  const exportSimpleReport = async () => {
-    await PDFExporter.exportSimpleReport({
-      user: user!,
-      metrics,
-      uploadedFiles
-    });
-  };
-
 
   // Login screen
   if (!user) {
@@ -140,17 +108,14 @@ export default function HomeScreen() {
       {/* Welcome Card */}
       <WelcomeCard user={user} />
 
-      {/* Current Performance Metrics */}
-      <MetricsCard metrics={metrics} />
-
       {/* File Upload Section */}
       <FileUploadCard
         uploadedFiles={uploadedFiles}
         isUploading={isUploading}
         user={user}
         onFileUpload={handleFileUpload}
-        onExportPDF={exportToPDF}
         onViewData={() => setModals(prev => ({ ...prev, dataViewer: true }))}
+        onGoToSimulation={user.role === 'developer' ? goToSimulation : undefined}
       />
 
       {/* AI Process Control */}
@@ -276,7 +241,7 @@ export default function HomeScreen() {
     </ScrollView>
   );
 
-  // renderContent fonksiyonunu güncelleyin:
+  // renderContent function
   const renderContent = () => {
     if (user?.role === 'admin') {
       if (currentTab === 'reports') {
@@ -287,13 +252,12 @@ export default function HomeScreen() {
             metrics={metrics}
             uploadedFiles={uploadedFiles}
             user={user}
-            onExportSimpleReport={exportAdminReport}
           />
         );
       }
       return renderDashboard();
     } else {
-      // Developer view (mevcut kod aynı kalacak)
+      // Developer view
       switch (currentTab) {
         case 'dashboard':
           return renderDashboard();
@@ -330,14 +294,12 @@ export default function HomeScreen() {
             <ReportsScreen
               reports={reports}
               setReports={setReports}
-              onExportPDF={exportToPDF}
             />
           );
-        default:
-          return renderDashboard();
-
         case 'test':
           return <TestScreen />;
+        default:
+          return renderDashboard();
       }
     }
   };
@@ -355,12 +317,6 @@ export default function HomeScreen() {
               </Text>
             </View>
             <View style={styles.headerButtons}>
-              <TouchableOpacity 
-                style={styles.headerButton}
-                onPress={() => setModals(prev => ({ ...prev, notifications: true }))}
-              >
-                <Text style={styles.headerButtonText}>🔔</Text>
-              </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.headerButton}
                 onPress={handleLogout}
@@ -467,52 +423,6 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
-
-      {/* Notifications Modal */}
-      <Modal
-        visible={modals.notifications}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setModals(prev => ({ ...prev, notifications: false }))}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>🔔 System Notifications</Text>
-              <TouchableOpacity
-                onPress={() => setModals(prev => ({ ...prev, notifications: false }))}
-              >
-                <Text style={styles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={styles.notificationList}>
-              {[
-                { id: 1, title: 'AI Optimization Completed', time: '2 hours ago', type: 'success', desc: 'System performance improved by 18.7%' },
-                { id: 2, title: 'Data Upload Successful', time: '1 hour ago', type: 'info', desc: 'New passenger data processed' },
-                { id: 3, title: 'Model Training Complete', time: '3 hours ago', type: 'success', desc: 'LSTM accuracy: 91.2%' },
-                { id: 4, title: 'System Health Check', time: '6 hours ago', type: 'info', desc: 'All systems operational' }
-              ].map((notification) => (
-                <View key={notification.id} style={styles.notificationItem}>
-                  <View style={[
-                    styles.notificationDot,
-                    { backgroundColor: 
-                      notification.type === 'success' ? '#16a34a' :
-                      notification.type === 'warning' ? '#f59e0b' : '#dc2626'
-                    }
-                  ]} />
-                  <View style={styles.notificationContent}>
-                    <Text style={styles.notificationTitle}>{notification.title}</Text>
-                    <Text style={styles.notificationDesc}>{notification.desc}</Text>
-                    <Text style={styles.notificationTime}>{notification.time}</Text>
-                  </View>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
-

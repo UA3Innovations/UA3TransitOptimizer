@@ -34,19 +34,6 @@ export interface OptimizationState {
   fitnessHistory: number[];
 }
 
-export interface SimulationState {
-  isRunning: boolean;
-  duration: string;
-  timeStep: string;
-  results: {
-    totalPassengers: number;
-    busAssignments: number;
-    stopUtilization: string;
-    maxOccupancy: number;
-  };
-  progress: number;
-}
-
 export interface ForecastingState {
   prophetRunning: boolean;
   lstmRunning: boolean;
@@ -61,7 +48,20 @@ export interface ForecastingState {
     improvement: number;
   };
 }
-
+export interface SimulationState {
+  isRunning: boolean;
+  startDate?: string;  // Yeni eklenen
+  endDate?: string;    // Yeni eklenen
+  duration: string;    // Eski - opsiyonel tutabilirsiniz
+  timeStep: string;    // Eski - opsiyonel tutabilirsiniz
+  results: {
+    totalPassengers: number;
+    busAssignments: number;
+    stopUtilization: string;
+    maxOccupancy: number;
+  };
+  progress: number;
+}
 export interface ReportsState {
   isGenerating: boolean;
   selectedPeriod: string;

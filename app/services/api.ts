@@ -43,11 +43,14 @@ export class APIService {
     return await response.json();
   }
 
-  static async runSimulation(duration: string, timeStep: string) {
+  static async runSimulation(startDate: string, endDate: string) {
     const response = await fetch(`${API_BASE_URL}/api/run-simulation`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ duration: parseInt(duration), time_step: parseInt(timeStep) })
+      body: JSON.stringify({ 
+        start_date: startDate, 
+        end_date: endDate 
+      })
     });
     return await response.json();
   }

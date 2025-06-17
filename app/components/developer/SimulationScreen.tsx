@@ -1,14 +1,15 @@
 // components/developer/SimulationScreen.tsx
 import React from 'react';
 import {
-    ActivityIndicator,
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SimulationState, UploadedFile } from '../../types/app';
 
@@ -27,37 +28,77 @@ export const SimulationScreen: React.FC<Props> = ({
   uploadedFiles,
   onRunSimulation
 }) => {
+  const hasUploadedFiles = uploadedFiles.length > 0;
+
+  const handleRunSimulation = () => {
+    if (hasUploadedFiles) {
+      Alert.alert(
+        'Data Already Available',
+        'You have uploaded real transit data. Simulation is used to generate data when you don\'t have real data. Would you like to use the existing uploaded data instead?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Use Uploaded Data', onPress: () => {
+            Alert.alert('Info', 'Please use Genetic Algorithm, Forecasting, or Reports with your uploaded data.');
+          }}
+        ]
+      );
+      return;
+    }
+    onRunSimulation();
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>🎯 Discrete-Event Simulation</Text>
-        <Text style={styles.sectionSubtitle}>Advanced system performance modeling</Text>
+        <Text style={styles.sectionSubtitle}>Generate realistic historical transit data</Text>
       </View>
+
+      {hasUploadedFiles && (
+        <View style={styles.warningCard}>
+          <Text style={styles.warningIcon}>ℹ️</Text>
+          <View style={styles.warningContent}>
+            <Text style={styles.warningTitle}>Real Data Detected</Text>
+            <Text style={styles.warningText}>
+              You have uploaded {uploadedFiles.length} data file(s). Simulation is used to generate data when you don't have real data. 
+              Use Genetic Algorithm, Forecasting, or Reports with your uploaded data instead.
+            </Text>
+            <View style={styles.warningActions}>
+              <Text style={styles.warningActionText}>Available options with your data:</Text>
+              <Text style={styles.warningActionItem}>• 🧬 Genetic Algorithm Optimization</Text>
+              <Text style={styles.warningActionItem}>• 📈 ML Forecasting (Prophet & LSTM)</Text>
+              <Text style={styles.warningActionItem}>• 📋 Advanced Analytics Reports</Text>
+            </View>
+          </View>
+        </View>
+      )}
 
       <View style={styles.simulationCard}>
         <Text style={styles.cardTitle}>⚙️ Simulation Parameters</Text>
         
         <View style={styles.parameterGrid}>
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Simulation Duration (days)</Text>
+            <Text style={styles.inputLabel}>Start Date</Text>
             <TextInput
-              style={styles.numberInput}
-              value={simulation.duration}
-              onChangeText={(text) => setSimulation(prev => ({ ...prev, duration: text }))}
-              keyboardType="numeric"
+              style={[styles.numberInput, hasUploadedFiles && styles.disabledInput]}
+              value={simulation.startDate || '01-01-2024'}
+              onChangeText={hasUploadedFiles ? undefined : (text) => setSimulation(prev => ({ ...prev, startDate: text }))}
+              placeholder="DD-MM-YYYY"
+              editable={!hasUploadedFiles}
             />
-            <Text style={styles.inputHint}>1-30 days</Text>
+            <Text style={styles.inputHint}>Format: DD-MM-YYYY</Text>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Time Step (minutes)</Text>
+            <Text style={styles.inputLabel}>End Date</Text>
             <TextInput
-              style={styles.numberInput}
-              value={simulation.timeStep}
-              onChangeText={(text) => setSimulation(prev => ({ ...prev, timeStep: text }))}
-              keyboardType="numeric"
+              style={[styles.numberInput, hasUploadedFiles && styles.disabledInput]}
+              value={simulation.endDate || '07-01-2024'}
+              onChangeText={hasUploadedFiles ? undefined : (text) => setSimulation(prev => ({ ...prev, endDate: text }))}
+              placeholder="DD-MM-YYYY"
+              editable={!hasUploadedFiles}
             />
-            <Text style={styles.inputHint}>1-60 minutes</Text>
+            <Text style={styles.inputHint}>Format: DD-MM-YYYY</Text>
           </View>
         </View>
 
@@ -71,9 +112,12 @@ export const SimulationScreen: React.FC<Props> = ({
         </View>
 
         <TouchableOpacity
-          style={[styles.primaryButton, (simulation.isRunning || uploadedFiles.length === 0) && styles.disabledButton]}
-          onPress={onRunSimulation}
-          disabled={simulation.isRunning || uploadedFiles.length === 0}
+          style={[
+            styles.primaryButton, 
+            (simulation.isRunning || hasUploadedFiles) && styles.disabledButton
+          ]}
+          onPress={handleRunSimulation}
+          disabled={simulation.isRunning || hasUploadedFiles}
         >
           <View style={styles.buttonContent}>
             {simulation.isRunning ? (
@@ -82,13 +126,14 @@ export const SimulationScreen: React.FC<Props> = ({
               <Text style={styles.buttonIcon}>🎯</Text>
             )}
             <Text style={styles.primaryButtonText}>
-              {simulation.isRunning ? `Simulation Running... ${simulation.progress}%` : 'Start Simulation'}
+              {simulation.isRunning ? `Simulation Running... ${simulation.progress}%` : 
+               hasUploadedFiles ? 'Real Data Available - Use Other Tools' : 'Start Simulation'}
             </Text>
           </View>
         </TouchableOpacity>
         
-        {uploadedFiles.length === 0 && (
-          <Text style={styles.requirementText}>Upload data files to begin simulation</Text>
+        {!hasUploadedFiles && (
+          <Text style={styles.requirementText}>Simulation generates data when you don't have real data files</Text>
         )}
       </View>
 
@@ -106,67 +151,12 @@ export const SimulationScreen: React.FC<Props> = ({
             </View>
           </View>
           <View style={styles.simulationStats}>
-            <Text style={styles.statItem}>Duration: {simulation.duration} days</Text>
-            <Text style={styles.statItem}>Time Step: {simulation.timeStep} minutes</Text>
+            <Text style={styles.statItem}>Start: {simulation.startDate || '01-01-2024'}</Text>
+            <Text style={styles.statItem}>End: {simulation.endDate || '07-01-2024'}</Text>
             <Text style={styles.statItem}>ETA: {Math.max(0, (100 - simulation.progress) * 0.3).toFixed(1)}s</Text>
           </View>
         </View>
       )}
-
-      {/* Results */}
-      <View style={styles.simulationResults}>
-        <Text style={styles.cardTitle}>📊 Simulation Results</Text>
-        <View style={styles.resultGrid}>
-          <View style={styles.resultCard}>
-            <Text style={styles.resultIcon}>👥</Text>
-            <Text style={styles.resultValue}>{simulation.results.totalPassengers.toLocaleString()}</Text>
-            <Text style={styles.resultLabel}>Total Boardings</Text>
-            <Text style={styles.resultTrend}>↑ 12.3%</Text>
-          </View>
-          
-          <View style={styles.resultCard}>
-            <Text style={styles.resultIcon}>🚌</Text>
-            <Text style={styles.resultValue}>{simulation.results.busAssignments.toLocaleString()}</Text>
-            <Text style={styles.resultLabel}>Bus Assignments</Text>
-            <Text style={styles.resultTrend}>↓ 5.7%</Text>
-          </View>
-          
-          <View style={styles.resultCard}>
-            <Text style={styles.resultIcon}>📍</Text>
-            <Text style={styles.resultValue}>{simulation.results.stopUtilization}%</Text>
-            <Text style={styles.resultLabel}>Stop Utilization</Text>
-            <Text style={styles.resultTrend}>↑ 8.1%</Text>
-          </View>
-          
-          <View style={styles.resultCard}>
-            <Text style={styles.resultIcon}>📈</Text>
-            <Text style={styles.resultValue}>{simulation.results.maxOccupancy}%</Text>
-            <Text style={styles.resultLabel}>Peak Occupancy</Text>
-            <Text style={styles.resultTrend}>→ 0.2%</Text>
-          </View>
-        </View>
-
-        {/* Detailed Analysis */}
-        <View style={styles.analysisCard}>
-          <Text style={styles.analysisTitle}>🔍 Performance Analysis</Text>
-          <View style={styles.analysisItem}>
-            <Text style={styles.analysisMetric}>Efficiency Score</Text>
-            <Text style={styles.analysisValue}>87.4%</Text>
-          </View>
-          <View style={styles.analysisItem}>
-            <Text style={styles.analysisMetric}>Cost Reduction</Text>
-            <Text style={styles.analysisValue}>₺124,850</Text>
-          </View>
-          <View style={styles.analysisItem}>
-            <Text style={styles.analysisMetric}>Passenger Satisfaction</Text>
-            <Text style={styles.analysisValue}>92.1%</Text>
-          </View>
-          <View style={styles.analysisItem}>
-            <Text style={styles.analysisMetric}>Environmental Impact</Text>
-            <Text style={styles.analysisValue}>-15.3% CO₂</Text>
-          </View>
-        </View>
-      </View>
     </ScrollView>
   );
 };
@@ -202,6 +192,58 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
+  
+  // Warning Card
+  warningCard: {
+    backgroundColor: '#fff7ed',
+    margin: 15,
+    padding: 20,
+    borderRadius: 20,
+    borderLeftWidth: 6,
+    borderLeftColor: '#f59e0b',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    flexDirection: 'row',
+  },
+  warningIcon: {
+    fontSize: 32,
+    marginRight: 15,
+  },
+  warningContent: {
+    flex: 1,
+  },
+  warningTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#92400e',
+    marginBottom: 8,
+  },
+  warningText: {
+    fontSize: 14,
+    color: '#78350f',
+    lineHeight: 20,
+    marginBottom: 15,
+  },
+  warningActions: {
+    backgroundColor: 'rgba(251, 191, 36, 0.1)',
+    padding: 15,
+    borderRadius: 10,
+  },
+  warningActionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#92400e',
+    marginBottom: 8,
+  },
+  warningActionItem: {
+    fontSize: 13,
+    color: '#78350f',
+    marginBottom: 4,
+  },
+
   simulationCard: {
     backgroundColor: 'white',
     margin: 15,
@@ -240,6 +282,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 2,
     borderColor: '#fecaca',
+  },
+  disabledInput: {
+    backgroundColor: '#f3f4f6',
+    borderColor: '#d1d5db',
+    color: '#9ca3af',
   },
   inputHint: {
     fontSize: 12,
@@ -294,7 +341,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#9ca3af',
     shadowOpacity: 0,
   },
   requirementText: {
@@ -360,86 +407,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#92400e',
     fontWeight: '500',
-  },
-  simulationResults: {
-    backgroundColor: 'white',
-    margin: 15,
-    padding: 25,
-    borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
-    borderLeftWidth: 6,
-    borderLeftColor: '#16a34a',
-  },
-  resultGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  resultCard: {
-    width: (width - 80) / 2,
-    backgroundColor: '#f8fafc',
-    padding: 20,
-    borderRadius: 15,
-    alignItems: 'center',
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  resultIcon: {
-    fontSize: 24,
-    marginBottom: 10,
-  },
-  resultValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#16a34a',
-    marginBottom: 8,
-  },
-  resultLabel: {
-    fontSize: 12,
-    color: '#64748b',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 5,
-  },
-  resultTrend: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#16a34a',
-  },
-  analysisCard: {
-    backgroundColor: '#f8fafc',
-    padding: 20,
-    borderRadius: 15,
-    marginTop: 20,
-  },
-  analysisTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 15,
-  },
-  analysisItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-  },
-  analysisMetric: {
-    fontSize: 14,
-    color: '#64748b',
-  },
-  analysisValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#16a34a',
   },
 });

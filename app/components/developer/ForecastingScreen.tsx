@@ -1,13 +1,13 @@
 // components/developer/ForecastingScreen.tsx
 import React from 'react';
 import {
-    ActivityIndicator,
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { ForecastingState, UploadedFile } from '../../types/app';
 
@@ -48,7 +48,6 @@ export const ForecastingScreen: React.FC<Props> = ({
           </Text>
           <View style={styles.modelStats}>
             <Text style={styles.modelStat}>MAE: <Text style={styles.statGood}>0.127</Text></Text>
-            <Text style={styles.modelStat}>Training: <Text style={styles.statInfo}>2.4 min</Text></Text>
           </View>
           <View style={styles.modelFeatures}>
             <Text style={styles.featureItem}>• Automatic seasonality detection</Text>
@@ -81,7 +80,6 @@ export const ForecastingScreen: React.FC<Props> = ({
           </Text>
           <View style={styles.modelStats}>
             <Text style={styles.modelStat}>RMSE: <Text style={styles.statGood}>0.184</Text></Text>
-            <Text style={styles.modelStat}>Training: <Text style={styles.statInfo}>12.4 min</Text></Text>
           </View>
           <View style={styles.modelFeatures}>
             <Text style={styles.featureItem}>• Long-term memory retention</Text>
@@ -113,105 +111,54 @@ export const ForecastingScreen: React.FC<Props> = ({
       {/* Model Comparison */}
       <View style={styles.comparisonCard}>
         <Text style={styles.cardTitle}>🔄 Model Comparison</Text>
-        <View style={styles.comparisonGrid}>
-          <View style={styles.comparisonHeader}>
-            <Text style={styles.comparisonMetric}>Metric</Text>
-            <Text style={styles.comparisonModel}>Prophet</Text>
-            <Text style={styles.comparisonModel}>LSTM</Text>
+        {(forecasting.prophetRunning || forecasting.lstmRunning) ? (
+          <View style={styles.loadingComparison}>
+            <ActivityIndicator size="large" color="#3b82f6" />
+            <Text style={styles.loadingText}>Running models to generate comparison...</Text>
           </View>
-          
-          <View style={styles.comparisonRow}>
-            <Text style={styles.comparisonMetric}>Accuracy</Text>
-            <Text style={styles.comparisonValue}>{forecasting.prophetAccuracy.toFixed(1)}%</Text>
-            <Text style={[styles.comparisonValue, styles.comparisonBest]}>
-              {forecasting.lstmAccuracy.toFixed(1)}%
-            </Text>
-          </View>
-          
-          <View style={styles.comparisonRow}>
-            <Text style={styles.comparisonMetric}>Training Speed</Text>
-            <Text style={[styles.comparisonValue, styles.comparisonBest]}>Fast</Text>
-            <Text style={styles.comparisonValue}>Slow</Text>
-          </View>
-          
-          <View style={styles.comparisonRow}>
-            <Text style={styles.comparisonMetric}>Interpretability</Text>
-            <Text style={[styles.comparisonValue, styles.comparisonBest]}>High</Text>
-            <Text style={styles.comparisonValue}>Low</Text>
-          </View>
-          
-          <View style={styles.comparisonRow}>
-            <Text style={styles.comparisonMetric}>Complexity</Text>
-            <Text style={[styles.comparisonValue, styles.comparisonBest]}>Low</Text>
-            <Text style={styles.comparisonValue}>High</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Forecast Results */}
-      <View style={styles.forecastCard}>
-        <Text style={styles.cardTitle}>🎯 Forecast Results</Text>
-        <View style={styles.forecastResult}>
-          <Text style={styles.forecastLine}>Next week passenger forecast:</Text>
-          <Text style={styles.forecastValue}>{forecasting.results.nextWeekPassengers.toLocaleString()}</Text>
-          <Text style={styles.forecastChange}>+{forecasting.results.improvement.toFixed(1)}% from last week</Text>
-        </View>
-        
-        <View style={styles.forecastDetails}>
-          <View style={styles.forecastDetail}>
-            <Text style={styles.forecastDetailIcon}>🕐</Text>
-            <Text style={styles.forecastDetailText}>Peak hour: {forecasting.results.peakHour}</Text>
-          </View>
-          <View style={styles.forecastDetail}>
-            <Text style={styles.forecastDetailIcon}>🚌</Text>
-            <Text style={styles.forecastDetailText}>Busiest route: {forecasting.results.busiestRoute}</Text>
-          </View>
-          <View style={styles.forecastDetail}>
-            <Text style={styles.forecastDetailIcon}>📍</Text>
-            <Text style={styles.forecastDetailText}>Critical stops: Kızılay, Ulus, Çankaya</Text>
-          </View>
-          <View style={styles.forecastDetail}>
-            <Text style={styles.forecastDetailIcon}>📊</Text>
-            <Text style={styles.forecastDetailText}>Confidence interval: 85-95%</Text>
-          </View>
-        </View>
-
-        {/* Weekly Forecast Chart */}
-        <View style={styles.weeklyChart}>
-          <Text style={styles.chartTitle}>📅 7-Day Forecast</Text>
-          <View style={styles.chartContainer}>
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => {
-              const value = Math.floor(Math.random() * 30 + 70);
-              return (
-                <View key={day} style={styles.chartColumn}>
-                  <View style={styles.chartBar}>
-                    <View 
-                      style={[
-                        styles.chartBarFill, 
-                        { 
-                          height: `${value}%`,
-                          backgroundColor: index < 2 ? '#16a34a' : '#3b82f6'
-                        }
-                      ]} 
-                    />
-                  </View>
-                  <Text style={styles.chartLabel}>{day}</Text>
-                  <Text style={styles.chartValue}>{value}K</Text>
-                </View>
-              );
-            })}
-          </View>
-          <View style={styles.chartLegend}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendColor, { backgroundColor: '#16a34a' }]} />
-              <Text style={styles.legendText}>Historical</Text>
+        ) : (forecasting.prophetAccuracy > 87.3 || forecasting.lstmAccuracy > 91.2) ? (
+          <View style={styles.comparisonGrid}>
+            <View style={styles.comparisonHeader}>
+              <Text style={styles.comparisonMetric}>Metric</Text>
+              <Text style={styles.comparisonModel}>Prophet</Text>
+              <Text style={styles.comparisonModel}>LSTM</Text>
             </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendColor, { backgroundColor: '#3b82f6' }]} />
-              <Text style={styles.legendText}>Forecast</Text>
+            
+            <View style={styles.comparisonRow}>
+              <Text style={styles.comparisonMetric}>Accuracy</Text>
+              <Text style={[styles.comparisonValue, forecasting.prophetAccuracy > forecasting.lstmAccuracy && styles.comparisonBest]}>
+                {forecasting.prophetAccuracy.toFixed(1)}%
+              </Text>
+              <Text style={[styles.comparisonValue, forecasting.lstmAccuracy > forecasting.prophetAccuracy && styles.comparisonBest]}>
+                {forecasting.lstmAccuracy.toFixed(1)}%
+              </Text>
+            </View>
+            
+            <View style={styles.comparisonRow}>
+              <Text style={styles.comparisonMetric}>Training Speed</Text>
+              <Text style={[styles.comparisonValue, styles.comparisonBest]}>Fast</Text>
+              <Text style={styles.comparisonValue}>Slow</Text>
+            </View>
+            
+            <View style={styles.comparisonRow}>
+              <Text style={styles.comparisonMetric}>Interpretability</Text>
+              <Text style={[styles.comparisonValue, styles.comparisonBest]}>High</Text>
+              <Text style={styles.comparisonValue}>Low</Text>
+            </View>
+            
+            <View style={styles.comparisonRow}>
+              <Text style={styles.comparisonMetric}>Complexity</Text>
+              <Text style={[styles.comparisonValue, styles.comparisonBest]}>Low</Text>
+              <Text style={styles.comparisonValue}>High</Text>
             </View>
           </View>
-        </View>
+        ) : (
+          <View style={styles.emptyComparison}>
+            <Text style={styles.emptyComparisonIcon}>📊</Text>
+            <Text style={styles.emptyComparisonText}>Run models to see comparison results</Text>
+            <Text style={styles.emptyComparisonSubtext}>Start Prophet or LSTM model to populate this section</Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -413,121 +360,39 @@ const styles = StyleSheet.create({
     color: '#16a34a',
     fontWeight: '600',
   },
-  forecastCard: {
-    backgroundColor: 'white',
-    margin: 15,
-    padding: 25,
-    borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
-    borderLeftWidth: 6,
-    borderLeftColor: '#16a34a',
-  },
-  forecastResult: {
+  
+  // Loading and Empty States
+  loadingComparison: {
     alignItems: 'center',
-    marginBottom: 25,
+    padding: 40,
   },
-  forecastLine: {
+  loadingText: {
+    marginTop: 15,
     fontSize: 16,
-    color: '#666',
-    marginBottom: 10,
-  },
-  forecastValue: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#16a34a',
-    marginBottom: 8,
-  },
-  forecastChange: {
-    fontSize: 14,
-    color: '#16a34a',
-    fontWeight: '600',
-  },
-  forecastDetails: {
-    backgroundColor: '#f0fdf4',
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 25,
-  },
-  forecastDetail: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  forecastDetailIcon: {
-    fontSize: 16,
-    marginRight: 10,
-  },
-  forecastDetailText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  weeklyChart: {
-    backgroundColor: '#f8fafc',
-    padding: 20,
-    borderRadius: 15,
-  },
-  chartTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 15,
+    color: '#64748b',
     textAlign: 'center',
   },
-  chartContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: 120,
+  emptyComparison: {
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: '#f8fafc',
+    borderRadius: 15,
+    margin: 15,
+  },
+  emptyComparisonIcon: {
+    fontSize: 48,
     marginBottom: 15,
   },
-  chartColumn: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  chartBar: {
-    width: 20,
-    height: 80,
-    backgroundColor: '#e2e8f0',
-    borderRadius: 10,
-    justifyContent: 'flex-end',
-    marginBottom: 8,
-  },
-  chartBarFill: {
-    borderRadius: 10,
-    minHeight: 4,
-  },
-  chartLabel: {
-    fontSize: 10,
-    color: '#64748b',
-    marginTop: 4,
-  },
-  chartValue: {
-    fontSize: 10,
+  emptyComparisonText: {
+    fontSize: 18,
     fontWeight: '600',
-    color: '#334155',
-    marginTop: 2,
-  },
-  chartLegend: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 20,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  legendColor: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 6,
-  },
-  legendText: {
-    fontSize: 12,
     color: '#64748b',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyComparisonSubtext: {
+    fontSize: 14,
+    color: '#94a3b8',
+    textAlign: 'center',
   },
 });

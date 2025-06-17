@@ -1,11 +1,11 @@
 // components/dashboard/FileUploadCard.tsx
 import React from 'react';
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { UploadedFile } from '../../types/app';
 import { User } from '../../types/auth';
@@ -15,8 +15,8 @@ interface Props {
   isUploading: boolean;
   user: User;
   onFileUpload: () => void;
-  onExportPDF: () => void;
   onViewData: () => void;
+  onGoToSimulation?: () => void;
 }
 
 export const FileUploadCard: React.FC<Props> = ({
@@ -24,22 +24,14 @@ export const FileUploadCard: React.FC<Props> = ({
   isUploading,
   user,
   onFileUpload,
-  onExportPDF,
-  onViewData
+  onViewData,
+  onGoToSimulation
 }) => {
   return (
     <View style={styles.uploadCard}>
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>📁 Data Management</Text>
         <View style={styles.cardHeaderActions}>
-          {user.role === 'developer' && (
-            <TouchableOpacity 
-              style={styles.exportButton}
-              onPress={onExportPDF}
-            >
-              <Text style={styles.exportButtonText}>📥 Export PDF</Text>
-            </TouchableOpacity>
-          )}
           <TouchableOpacity 
             style={styles.viewDataButton}
             onPress={onViewData}
@@ -49,29 +41,86 @@ export const FileUploadCard: React.FC<Props> = ({
         </View>
       </View>
       
-      <TouchableOpacity 
-        style={styles.uploadZone}
-        onPress={onFileUpload}
-        disabled={isUploading}
-      >
-        {isUploading ? (
-          <View style={styles.uploadLoading}>
-            <ActivityIndicator size="large" color="#dc2626" />
-            <Text style={styles.uploadLoadingText}>Processing files...</Text>
-          </View>
-        ) : (
-          <View style={styles.uploadContent}>
-            <View style={styles.uploadIconContainer}>
-              <Text style={styles.uploadIcon}>📤</Text>
+      {/* Developer için iki seçenek */}
+      {user.role === 'developer' ? (
+        <View style={styles.developerOptions}>
+          <Text style={styles.optionsTitle}>Choose Data Source:</Text>
+          
+          {/* Option 1: Upload your own files */}
+          <TouchableOpacity 
+            style={styles.optionCard}
+            onPress={onFileUpload}
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <View style={styles.uploadLoading}>
+                <ActivityIndicator size="large" color="#dc2626" />
+                <Text style={styles.uploadLoadingText}>Processing files...</Text>
+              </View>
+            ) : (
+              <View style={styles.optionContent}>
+                <View style={styles.optionIconContainer}>
+                  <Text style={styles.optionIcon}>📤</Text>
+                </View>
+                <Text style={styles.optionTitle}>Upload Historical Data</Text>
+                <Text style={styles.optionDescription}>
+                  Use your own CSV, Excel, or JSON transit data files
+                </Text>
+                <View style={styles.optionButton}>
+                  <Text style={styles.optionButtonText}>Browse Files</Text>
+                </View>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          {/* Option 2: Generate from simulation */}
+          <TouchableOpacity 
+            style={styles.optionCard}
+            onPress={onGoToSimulation}
+            disabled={isUploading}
+          >
+            <View style={styles.optionContent}>
+              <View style={styles.optionIconContainer}>
+                <Text style={styles.optionIcon}>🎯</Text>
+              </View>
+              <Text style={styles.optionTitle}>Generate from Simulation</Text>
+              <Text style={styles.optionDescription}>
+                Create realistic historical data using our simulation engine
+              </Text>
+              <View style={[styles.optionButton, styles.simulationButton]}>
+                <Text style={styles.optionButtonText}>Go to Simulation</Text>
+              </View>
             </View>
-            <Text style={styles.uploadText}>Upload Transit Data</Text>
-            <Text style={styles.uploadSubtext}>CSV, Excel, JSON files supported</Text>
-            <View style={styles.uploadHint}>
-              <Text style={styles.uploadHintText}>Tap to browse files</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        /* Admin için sadece upload seçeneği */
+        <TouchableOpacity 
+          style={styles.uploadZone}
+          onPress={onFileUpload}
+          disabled={isUploading}
+        >
+          {isUploading ? (
+            <View style={styles.uploadLoading}>
+              <ActivityIndicator size="large" color="#dc2626" />
+              <Text style={styles.uploadLoadingText}>Processing files...</Text>
             </View>
-          </View>
-        )}
-      </TouchableOpacity>
+          ) : (
+            <View style={styles.uploadContent}>
+              <View style={styles.uploadIconContainer}>
+                <Text style={styles.uploadIcon}>📤</Text>
+              </View>
+              <Text style={styles.uploadText}>Upload Transit Data</Text>
+              <Text style={styles.uploadSubtext}>
+                Upload your historical transit data files (CSV, Excel, JSON)
+              </Text>
+              <View style={styles.uploadHint}>
+                <Text style={styles.uploadHintText}>Tap to browse files</Text>
+              </View>
+            </View>
+          )}
+        </TouchableOpacity>
+      )}
       
       {uploadedFiles.length > 0 && (
         <View style={styles.fileList}>
@@ -123,18 +172,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
-  exportButton: {
-    backgroundColor: '#16a34a',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    marginRight: 8,
-  },
-  exportButtonText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-  },
   viewDataButton: {
     backgroundColor: '#fee2e2',
     paddingHorizontal: 12,
@@ -146,6 +183,66 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
+
+  // Developer Options
+  developerOptions: {
+    marginBottom: 20,
+  },
+  optionsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  optionCard: {
+    borderWidth: 2,
+    borderColor: '#fecaca',
+    borderRadius: 20,
+    padding: 25,
+    marginBottom: 15,
+    backgroundColor: '#fef2f2',
+  },
+  optionContent: {
+    alignItems: 'center',
+  },
+  optionIconContainer: {
+    marginBottom: 15,
+  },
+  optionIcon: {
+    fontSize: 40,
+  },
+  optionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  optionDescription: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  optionButton: {
+    backgroundColor: '#dc2626',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 15,
+  },
+  simulationButton: {
+    backgroundColor: '#3b82f6',
+  },
+  optionButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  // Admin Upload Zone
   uploadZone: {
     borderWidth: 3,
     borderColor: '#fecaca',
@@ -174,6 +271,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 15,
+    textAlign: 'center',
+    lineHeight: 20,
+    paddingHorizontal: 10,
   },
   uploadHint: {
     backgroundColor: '#dc2626',
@@ -186,6 +286,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
+
+  // Loading state
   uploadLoading: {
     alignItems: 'center',
   },
@@ -194,6 +296,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
+
+  // File list
   fileList: {
     marginTop: 25,
     padding: 20,

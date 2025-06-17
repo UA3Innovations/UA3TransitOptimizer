@@ -7,8 +7,10 @@ import { SimulationState, UploadedFile } from '../types/app';
 export const useSimulation = (uploadedFiles: UploadedFile[]) => {
   const [simulation, setSimulation] = useState<SimulationState>({
     isRunning: false,
-    duration: '7',
-    timeStep: '5',
+    startDate: '01-01-2024',  // Yeni eklenen
+    endDate: '07-01-2024',    // Yeni eklenen
+    duration: '7',            // Eski - geriye uyumluluk için
+    timeStep: '5',            // Eski - geriye uyumluluk için
     results: {
       totalPassengers: 346735,
       busAssignments: 2429,
@@ -16,7 +18,7 @@ export const useSimulation = (uploadedFiles: UploadedFile[]) => {
       maxOccupancy: 172
     },
     progress: 0
-  });
+});
 
   const runSimulation = async () => {
     if (simulation.isRunning) return;
@@ -28,7 +30,10 @@ export const useSimulation = (uploadedFiles: UploadedFile[]) => {
     setSimulation(prev => ({ ...prev, isRunning: true, progress: 0 }));
 
     try {
-      const result = await APIService.runSimulation(simulation.duration, simulation.timeStep);
+      const result = await APIService.runSimulation(
+        simulation.startDate || '01-01-2024', 
+        simulation.endDate || '07-01-2024'
+      );
       
       if (result.success) {
         setSimulation(prev => ({
@@ -45,7 +50,7 @@ export const useSimulation = (uploadedFiles: UploadedFile[]) => {
 
         Alert.alert(
           'Success! 🎯', 
-          `Simulation completed!\n• Efficiency: ${result.simulation_results.efficiency_score}%\n• Cost reduction: ₺${result.simulation_results.cost_reduction}`
+          `Simulation completed for ${simulation.startDate} to ${simulation.endDate}!\n• Efficiency: ${result.simulation_results.efficiency_score}%\n• Cost reduction: ₺${result.simulation_results.cost_reduction}`
         );
       }
     } catch (error) {

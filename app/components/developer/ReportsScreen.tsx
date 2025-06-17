@@ -2,6 +2,7 @@
 import React from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   ScrollView,
   StyleSheet,
@@ -16,13 +17,11 @@ const { width } = Dimensions.get('window');
 interface Props {
   reports: ReportsState;
   setReports: (value: ReportsState | ((prev: ReportsState) => ReportsState)) => void;
-  onExportPDF: () => void;
 }
 
 export const ReportsScreen: React.FC<Props> = ({
   reports,
-  setReports,
-  onExportPDF
+  setReports
 }) => {
   // Sample metrics for display
   const metrics = {
@@ -238,12 +237,12 @@ export const ReportsScreen: React.FC<Props> = ({
               setReports(prev => ({ ...prev, isGenerating: true }));
               await new Promise(resolve => setTimeout(resolve, 1500));
               setReports(prev => ({ ...prev, isGenerating: false }));
-              onExportPDF();
+              Alert.alert('Summary', 'Weekly summary generated successfully');
             }}
           >
             <Text style={styles.reportActionIcon}>📊</Text>
             <Text style={styles.reportActionText}>Weekly Summary</Text>
-            <Text style={styles.reportActionDesc}>Comprehensive report</Text>
+            <Text style={styles.reportActionDesc}>Generate overview</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
@@ -252,17 +251,7 @@ export const ReportsScreen: React.FC<Props> = ({
               setReports(prev => ({ ...prev, isGenerating: true }));
               await new Promise(resolve => setTimeout(resolve, 1000));
               setReports(prev => ({ ...prev, isGenerating: false }));
-              
-              // Quick daily report
-              const dailyReport = `Daily Transit Report - ${new Date().toLocaleDateString()}
-              
-Average Wait Time: ${metrics.avgWaitTime} minutes
-Fleet Utilization: ${metrics.occupancyRate}%
-On-Time Performance: ${metrics.onTimePerf}%
-
-Status: ${metrics.onTimePerf >= 95 ? 'Excellent' : metrics.onTimePerf >= 90 ? 'Good' : 'Needs Attention'}`;
-              
-              console.log('Daily report generated:', dailyReport);
+              Alert.alert('Daily Report', 'Daily report generated successfully');
             }}
           >
             <Text style={styles.reportActionIcon}>📅</Text>
@@ -277,36 +266,6 @@ Status: ${metrics.onTimePerf >= 95 ? 'Excellent' : metrics.onTimePerf >= 90 ? 'G
             <Text style={styles.reportGeneratingText}>Generating report...</Text>
           </View>
         )}
-      </View>
-
-      {/* Data Status */}
-      <View style={styles.dataStatusCard}>
-        <Text style={styles.cardTitle}>📁 Data Status</Text>
-        <View style={styles.dataStatusGrid}>
-          <View style={styles.dataStatusItem}>
-            <Text style={styles.dataStatusIcon}>📄</Text>
-            <Text style={styles.dataStatusValue}>12</Text>
-            <Text style={styles.dataStatusLabel}>Files Processed</Text>
-          </View>
-          
-          <View style={styles.dataStatusItem}>
-            <Text style={styles.dataStatusIcon}>📊</Text>
-            <Text style={styles.dataStatusValue}>48.2K</Text>
-            <Text style={styles.dataStatusLabel}>Total Records</Text>
-          </View>
-          
-          <View style={styles.dataStatusItem}>
-            <Text style={styles.dataStatusIcon}>⚡</Text>
-            <Text style={styles.dataStatusValue}>Live</Text>
-            <Text style={styles.dataStatusLabel}>Data Status</Text>
-          </View>
-          
-          <View style={styles.dataStatusItem}>
-            <Text style={styles.dataStatusIcon}>🔄</Text>
-            <Text style={styles.dataStatusValue}>Auto</Text>
-            <Text style={styles.dataStatusLabel}>Updates</Text>
-          </View>
-        </View>
       </View>
     </ScrollView>
   );
@@ -627,52 +586,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#dc2626',
     fontWeight: '500',
-  },
-
-  // Data Status
-  dataStatusCard: {
-    backgroundColor: 'white',
-    margin: 15,
-    padding: 25,
-    borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
-    borderLeftWidth: 6,
-    borderLeftColor: '#8b5cf6',
-    marginBottom: 30,
-  },
-  dataStatusGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  dataStatusItem: {
-    width: (width - 80) / 2,
-    backgroundColor: '#faf5ff',
-    padding: 18,
-    borderRadius: 15,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  dataStatusIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  dataStatusValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#8b5cf6',
-    marginBottom: 4,
-  },
-  dataStatusLabel: {
-    fontSize: 11,
-    color: '#64748b',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    fontWeight: '600',
   },
 });
