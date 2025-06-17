@@ -1,13 +1,13 @@
 // components/developer/ReportsScreen.tsx
 import React from 'react';
 import {
-    Alert,
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { ReportsState } from '../../types/app';
 
@@ -24,271 +24,287 @@ export const ReportsScreen: React.FC<Props> = ({
   setReports,
   onExportPDF
 }) => {
+  // Sample metrics for display
+  const metrics = {
+    avgWaitTime: 7.8,
+    occupancyRate: 66,
+    onTimePerf: 94,
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>📊 Advanced Analytics</Text>
-        <Text style={styles.sectionSubtitle}>Comprehensive data analysis and insights</Text>
+        <Text style={styles.sectionTitle}>📋 Performance Reports</Text>
+        <Text style={styles.sectionSubtitle}>Simple analytics and insights for developers</Text>
       </View>
 
-      {/* Analytics Dashboard */}
+      {/* Period Selection */}
       <View style={styles.reportCard}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>🔥 Usage Heatmap</Text>
-          <TouchableOpacity style={styles.exportMiniButton}>
-            <Text style={styles.exportMiniText}>Export</Text>
-          </TouchableOpacity>
-        </View>
-        
-        {/* Simple Heatmap Representation */}
-        <View style={styles.heatmapContainer}>
-          <View style={styles.heatmapHeader}>
-            <Text style={styles.heatmapTitle}>Passenger Density by Hour & Day</Text>
-          </View>
-          <View style={styles.heatmapGrid}>
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, dayIndex) => (
-              <View key={day} style={styles.heatmapRow}>
-                <Text style={styles.heatmapDayLabel}>{day}</Text>
-                {[6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((hour) => {
-                  const intensity = Math.random();
-                  return (
-                    <View 
-                      key={hour} 
-                      style={[
-                        styles.heatmapCell,
-                        { 
-                          backgroundColor: intensity > 0.8 ? '#dc2626' : 
-                                         intensity > 0.6 ? '#f97316' : 
-                                         intensity > 0.4 ? '#eab308' : 
-                                         intensity > 0.2 ? '#22c55e' : '#e5e7eb'
-                        }
-                      ]}
-                    />
-                  );
-                })}
-              </View>
-            ))}
-          </View>
-          <View style={styles.heatmapLegend}>
-            <Text style={styles.legendText}>Low</Text>
-            <View style={styles.legendGradient}>
-              {[0.1, 0.3, 0.5, 0.7, 0.9].map((intensity, i) => (
-                <View 
-                  key={i}
-                  style={[
-                    styles.legendColor,
-                    { backgroundColor: intensity > 0.8 ? '#dc2626' : 
-                                     intensity > 0.6 ? '#f97316' : 
-                                     intensity > 0.4 ? '#eab308' : 
-                                     intensity > 0.2 ? '#22c55e' : '#e5e7eb' }
-                  ]}
-                />
-              ))}
-            </View>
-            <Text style={styles.legendText}>High</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Route Performance Analysis */}
-      <View style={styles.reportCard}>
-        <Text style={styles.cardTitle}>🚌 Route Performance Analysis</Text>
-        <View style={styles.routeAnalysisContainer}>
-          {reports.chartData.routeAnalysis.map((route, index) => (
-            <View key={index} style={styles.routeAnalysisItem}>
-              <View style={styles.routeInfo}>
-                <Text style={styles.routeName}>{route.route}</Text>
-                <Text style={styles.routePassengers}>{route.passengers.toLocaleString()} passengers</Text>
-              </View>
-              <View style={styles.routeMetrics}>
-                <View style={styles.routeMetric}>
-                  <Text style={styles.routeMetricValue}>{route.efficiency}%</Text>
-                  <Text style={styles.routeMetricLabel}>Efficiency</Text>
-                </View>
-                <View style={styles.routeMetric}>
-                  <Text style={styles.routeMetricValue}>₺{(route.revenue/1000).toFixed(1)}K</Text>
-                  <Text style={styles.routeMetricLabel}>Revenue</Text>
-                </View>
-                <View style={styles.routeMetric}>
-                  <Text style={styles.routeMetricValue}>{((route.passengers / 15420) * 100).toFixed(0)}%</Text>
-                  <Text style={styles.routeMetricLabel}>Share</Text>
-                </View>
-              </View>
-              <View style={styles.routeProgressBar}>
-                <View 
-                  style={[
-                    styles.routeProgress, 
-                    { width: `${route.efficiency}%` }
-                  ]} 
-                />
-              </View>
-            </View>
+        <Text style={styles.cardTitle}>📅 Report Period</Text>
+        <View style={styles.periodSelector}>
+          {['Today', 'Week', 'Month'].map((period) => (
+            <TouchableOpacity
+              key={period}
+              style={[
+                styles.periodButton,
+                reports.selectedPeriod === period.toLowerCase() && styles.periodButtonActive
+              ]}
+              onPress={() => setReports(prev => ({ ...prev, selectedPeriod: period.toLowerCase() }))}
+            >
+              <Text style={[
+                styles.periodButtonText,
+                reports.selectedPeriod === period.toLowerCase() && styles.periodButtonTextActive
+              ]}>
+                {period}
+              </Text>
+            </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      {/* Multi-Chart Analysis */}
+      {/* Key Metrics Summary */}
       <View style={styles.reportCard}>
-        <Text style={styles.cardTitle}>📈 Performance Charts</Text>
-        
-        {/* Wait Time Trend */}
-        <View style={styles.chartSection}>
-          <Text style={styles.chartSectionTitle}>Average Wait Time Trend</Text>
-          <View style={styles.lineChart}>
-            {reports.chartData.daily.map((day, index) => (
-              <View key={index} style={styles.lineChartPoint}>
-                <View 
-                  style={[
-                    styles.lineChartDot,
-                    { bottom: `${(day.waitTime / 10) * 100}%` }
-                  ]}
-                />
-                <Text style={styles.lineChartLabel}>{day.name}</Text>
-              </View>
-            ))}
+        <Text style={styles.cardTitle}>🎯 Performance Summary</Text>
+        <View style={styles.adminMetricsGrid}>
+          <View style={styles.adminMetricCard}>
+            <Text style={styles.adminMetricIcon}>⏱️</Text>
+            <Text style={styles.adminMetricValue}>{metrics.avgWaitTime}m</Text>
+            <Text style={styles.adminMetricLabel}>Avg Wait</Text>
+            <Text style={[styles.adminMetricTrend, styles.trendGood]}>↓ 12%</Text>
           </View>
-          <View style={styles.chartStats}>
-            <Text style={styles.chartStat}>Avg: 7.8 min</Text>
-            <Text style={styles.chartStat}>Best: 6.2 min (Sun)</Text>
-            <Text style={styles.chartStat}>Worst: 9.1 min (Fri)</Text>
+          
+          <View style={styles.adminMetricCard}>
+            <Text style={styles.adminMetricIcon}>🚌</Text>
+            <Text style={styles.adminMetricValue}>{metrics.occupancyRate}%</Text>
+            <Text style={styles.adminMetricLabel}>Utilization</Text>
+            <Text style={[styles.adminMetricTrend, styles.trendGood]}>↑ 8%</Text>
           </View>
-        </View>
-
-        {/* Occupancy Analysis */}
-        <View style={styles.chartSection}>
-          <Text style={styles.chartSectionTitle}>Fleet Utilization</Text>
-          <View style={styles.barChart}>
-            {reports.chartData.daily.map((day, index) => (
-              <View key={index} style={styles.barChartColumn}>
-                <View 
-                  style={[
-                    styles.barChartBar,
-                    { height: `${day.occupancy}%` }
-                  ]}
-                />
-                <Text style={styles.barChartLabel}>{day.name}</Text>
-                <Text style={styles.barChartValue}>{day.occupancy}%</Text>
-              </View>
-            ))}
+          
+          <View style={styles.adminMetricCard}>
+            <Text style={styles.adminMetricIcon}>🎯</Text>
+            <Text style={styles.adminMetricValue}>{metrics.onTimePerf}%</Text>
+            <Text style={styles.adminMetricLabel}>On-Time</Text>
+            <Text style={[styles.adminMetricTrend, styles.trendGood]}>↑ 5%</Text>
           </View>
-          <View style={styles.chartStats}>
-            <Text style={styles.chartStat}>Avg: 66%</Text>
-            <Text style={styles.chartStat}>Peak: 75% (Fri)</Text>
-            <Text style={styles.chartStat}>Low: 52% (Sun)</Text>
+          
+          <View style={styles.adminMetricCard}>
+            <Text style={styles.adminMetricIcon}>👥</Text>
+            <Text style={styles.adminMetricValue}>24.8K</Text>
+            <Text style={styles.adminMetricLabel}>Passengers</Text>
+            <Text style={[styles.adminMetricTrend, styles.trendGood]}>↑ 15%</Text>
           </View>
         </View>
       </View>
 
-      {/* Performance Insights */}
+      {/* Simple Performance Chart */}
+      <View style={styles.reportCard}>
+        <Text style={styles.cardTitle}>📈 Performance Trend (Last 7 Days)</Text>
+        <View style={styles.simpleChart}>
+          {reports.chartData.daily.map((day, index) => {
+            const performance = day.onTime;
+            const isGood = performance >= 95;
+            const isOk = performance >= 90;
+            
+            return (
+              <View key={index} style={styles.chartColumn}>
+                <View style={styles.chartBar}>
+                  <View 
+                    style={[
+                      styles.chartBarFill, 
+                      { 
+                        height: `${performance}%`,
+                        backgroundColor: isGood ? '#16a34a' : isOk ? '#f59e0b' : '#dc2626'
+                      }
+                    ]} 
+                  />
+                </View>
+                <Text style={styles.chartLabel}>{day.name}</Text>
+                <Text style={[styles.chartValue, {
+                  color: isGood ? '#16a34a' : isOk ? '#f59e0b' : '#dc2626'
+                }]}>{performance}%</Text>
+              </View>
+            );
+          })}
+        </View>
+        <Text style={styles.chartDescription}>On-time performance by day</Text>
+        
+        <View style={styles.chartLegend}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, {backgroundColor: '#16a34a'}]} />
+            <Text style={styles.legendText}>Excellent (95%+)</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, {backgroundColor: '#f59e0b'}]} />
+            <Text style={styles.legendText}>Good (90-95%)</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, {backgroundColor: '#dc2626'}]} />
+            <Text style={styles.legendText}>Needs Attention (90%)</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Wait Time Analysis */}
+      <View style={styles.reportCard}>
+        <Text style={styles.cardTitle}>⏱️ Wait Time Analysis</Text>
+        <View style={styles.waitTimeChart}>
+          {reports.chartData.daily.map((day, index) => {
+            const waitTime = day.waitTime;
+            const barHeight = (waitTime / 10) * 100; // Max 10 minutes scale
+            
+            return (
+              <View key={index} style={styles.waitTimeColumn}>
+                <View style={styles.waitTimeBar}>
+                  <View 
+                    style={[
+                      styles.waitTimeBarFill, 
+                      { 
+                        height: `${Math.min(barHeight, 100)}%`,
+                        backgroundColor: waitTime <= 7 ? '#16a34a' : waitTime <= 9 ? '#f59e0b' : '#dc2626'
+                      }
+                    ]} 
+                  />
+                </View>
+                <Text style={styles.chartLabel}>{day.name}</Text>
+                <Text style={styles.waitTimeValue}>{waitTime}m</Text>
+              </View>
+            );
+          })}
+        </View>
+        <Text style={styles.chartDescription}>Average passenger wait time by day</Text>
+      </View>
+
+      {/* Key Insights */}
       <View style={styles.insightsCard}>
-        <Text style={styles.cardTitle}>💡 AI-Generated Insights</Text>
+        <Text style={styles.cardTitle}>💡 Key Insights</Text>
         <View style={styles.insightsList}>
           <View style={styles.insightItem}>
-            <Text style={styles.insightIcon}>🔍</Text>
+            <Text style={styles.insightIcon}>
+              {metrics.onTimePerf >= 95 ? '✅' : metrics.onTimePerf >= 90 ? '⚠️' : '❌'}
+            </Text>
             <View style={styles.insightContent}>
-              <Text style={styles.insightTitle}>Peak Hour Optimization</Text>
+              <Text style={styles.insightTitle}>On-Time Performance</Text>
               <Text style={styles.insightText}>
-                Friday 17:00-18:00 shows highest overcrowding. Consider deploying 3 additional buses.
+                {metrics.onTimePerf >= 95 
+                  ? 'Excellent! System is performing above target.' 
+                  : metrics.onTimePerf >= 90 
+                  ? 'Good performance with room for improvement.'
+                  : 'Below target. Consider schedule adjustments.'}
               </Text>
-              <Text style={styles.insightImpact}>Impact: -23% wait time</Text>
             </View>
           </View>
 
           <View style={styles.insightItem}>
-            <Text style={styles.insightIcon}>📊</Text>
+            <Text style={styles.insightIcon}>
+              {metrics.avgWaitTime <= 7 ? '✅' : metrics.avgWaitTime <= 9 ? '⚠️' : '❌'}
+            </Text>
             <View style={styles.insightContent}>
-              <Text style={styles.insightTitle}>Route Efficiency</Text>
+              <Text style={styles.insightTitle}>Wait Times</Text>
               <Text style={styles.insightText}>
-                Route 101 operates at 92% efficiency. Routes 103-105 could benefit from schedule adjustment.
+                {metrics.avgWaitTime <= 7 
+                  ? 'Great! Wait times are within acceptable range.' 
+                  : metrics.avgWaitTime <= 9 
+                  ? 'Acceptable wait times, monitoring recommended.'
+                  : 'High wait times detected. Action needed.'}
               </Text>
-              <Text style={styles.insightImpact}>Impact: +15% efficiency</Text>
             </View>
           </View>
 
           <View style={styles.insightItem}>
-            <Text style={styles.insightIcon}>⚡</Text>
+            <Text style={styles.insightIcon}>
+              {metrics.occupancyRate >= 60 && metrics.occupancyRate <= 75 ? '✅' : '⚠️'}
+            </Text>
             <View style={styles.insightContent}>
-              <Text style={styles.insightTitle}>Cost Optimization</Text>
+              <Text style={styles.insightTitle}>Fleet Utilization</Text>
               <Text style={styles.insightText}>
-                Weekend services show 48% lower utilization. Dynamic scheduling could reduce costs.
+                {metrics.occupancyRate >= 60 && metrics.occupancyRate <= 75
+                  ? 'Optimal fleet utilization achieved.'
+                  : metrics.occupancyRate > 75 
+                  ? 'High utilization - monitor capacity.'
+                  : 'Low utilization - optimize routes.'}
               </Text>
-              <Text style={styles.insightImpact}>Impact: ₺85K/month savings</Text>
             </View>
           </View>
         </View>
       </View>
 
-      {/* Advanced Export Options */}
+      {/* Quick Actions */}
       <View style={styles.reportCard}>
-        <Text style={styles.cardTitle}>📋 Export Options</Text>
-        <View style={styles.exportGrid}>
+        <Text style={styles.cardTitle}>🚀 Quick Actions</Text>
+        <View style={styles.quickReportActions}>
           <TouchableOpacity 
-            style={styles.exportOptionButton}
-            onPress={onExportPDF}
+            style={styles.reportActionButton}
+            onPress={async () => {
+              setReports(prev => ({ ...prev, isGenerating: true }));
+              await new Promise(resolve => setTimeout(resolve, 1500));
+              setReports(prev => ({ ...prev, isGenerating: false }));
+              onExportPDF();
+            }}
           >
-            <Text style={styles.exportOptionIcon}>📊</Text>
-            <Text style={styles.exportOptionText}>Complete Analytics</Text>
-            <Text style={styles.exportOptionDesc}>All charts & data</Text>
+            <Text style={styles.reportActionIcon}>📊</Text>
+            <Text style={styles.reportActionText}>Weekly Summary</Text>
+            <Text style={styles.reportActionDesc}>Comprehensive report</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={styles.exportOptionButton}
-            onPress={() => {
-              Alert.alert('Export', 'Heatmap data exported to CSV');
+            style={styles.reportActionButton}
+            onPress={async () => {
+              setReports(prev => ({ ...prev, isGenerating: true }));
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              setReports(prev => ({ ...prev, isGenerating: false }));
+              
+              // Quick daily report
+              const dailyReport = `Daily Transit Report - ${new Date().toLocaleDateString()}
+              
+Average Wait Time: ${metrics.avgWaitTime} minutes
+Fleet Utilization: ${metrics.occupancyRate}%
+On-Time Performance: ${metrics.onTimePerf}%
+
+Status: ${metrics.onTimePerf >= 95 ? 'Excellent' : metrics.onTimePerf >= 90 ? 'Good' : 'Needs Attention'}`;
+              
+              console.log('Daily report generated:', dailyReport);
             }}
           >
-            <Text style={styles.exportOptionIcon}>🔥</Text>
-            <Text style={styles.exportOptionText}>Heatmap Data</Text>
-            <Text style={styles.exportOptionDesc}>CSV format</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.exportOptionButton}
-            onPress={() => {
-              Alert.alert('Export', 'Route analysis exported');
-            }}
-          >
-            <Text style={styles.exportOptionIcon}>🚌</Text>
-            <Text style={styles.exportOptionText}>Route Analysis</Text>
-            <Text style={styles.exportOptionDesc}>Excel report</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.exportOptionButton}
-            onPress={() => {
-              Alert.alert('Export', 'Custom dashboard configured');
-            }}
-          >
-            <Text style={styles.exportOptionIcon}>⚙️</Text>
-            <Text style={styles.exportOptionText}>Custom Report</Text>
-            <Text style={styles.exportOptionDesc}>Configure metrics</Text>
+            <Text style={styles.reportActionIcon}>📅</Text>
+            <Text style={styles.reportActionText}>Daily Report</Text>
+            <Text style={styles.reportActionDesc}>Quick overview</Text>
           </TouchableOpacity>
         </View>
+        
+        {reports.isGenerating && (
+          <View style={styles.reportGenerating}>
+            <ActivityIndicator color="#dc2626" />
+            <Text style={styles.reportGeneratingText}>Generating report...</Text>
+          </View>
+        )}
       </View>
 
-      {/* Real-time Monitoring */}
-      <View style={styles.monitoringCard}>
-        <Text style={styles.cardTitle}>📡 Real-time Monitoring</Text>
-        <View style={styles.monitoringGrid}>
-          <View style={styles.monitoringItem}>
-            <Text style={styles.monitoringIcon}>📍</Text>
-            <Text style={styles.monitoringValue}>245</Text>
-            <Text style={styles.monitoringLabel}>Active Stops</Text>
-            <Text style={styles.monitoringStatus}>Operational</Text>
+      {/* Data Status */}
+      <View style={styles.dataStatusCard}>
+        <Text style={styles.cardTitle}>📁 Data Status</Text>
+        <View style={styles.dataStatusGrid}>
+          <View style={styles.dataStatusItem}>
+            <Text style={styles.dataStatusIcon}>📄</Text>
+            <Text style={styles.dataStatusValue}>12</Text>
+            <Text style={styles.dataStatusLabel}>Files Processed</Text>
           </View>
-
-          <View style={styles.monitoringItem}>
-            <Text style={styles.monitoringIcon}>👥</Text>
-            <Text style={styles.monitoringValue}>8.2K</Text>
-            <Text style={styles.monitoringLabel}>Current Passengers</Text>
-            <Text style={styles.monitoringStatus}>Normal</Text>
+          
+          <View style={styles.dataStatusItem}>
+            <Text style={styles.dataStatusIcon}>📊</Text>
+            <Text style={styles.dataStatusValue}>48.2K</Text>
+            <Text style={styles.dataStatusLabel}>Total Records</Text>
           </View>
-
-          <View style={styles.monitoringItem}>
-            <Text style={styles.monitoringIcon}>⚠️</Text>
-            <Text style={styles.monitoringValue}>3</Text>
-            <Text style={styles.monitoringLabel}>Alerts</Text>
-            <Text style={[styles.monitoringStatus, styles.alertStatus]}>Attention</Text>
+          
+          <View style={styles.dataStatusItem}>
+            <Text style={styles.dataStatusIcon}>⚡</Text>
+            <Text style={styles.dataStatusValue}>Live</Text>
+            <Text style={styles.dataStatusLabel}>Data Status</Text>
+          </View>
+          
+          <View style={styles.dataStatusItem}>
+            <Text style={styles.dataStatusIcon}>🔄</Text>
+            <Text style={styles.dataStatusValue}>Auto</Text>
+            <Text style={styles.dataStatusLabel}>Updates</Text>
           </View>
         </View>
       </View>
@@ -340,227 +356,181 @@ const styles = StyleSheet.create({
     borderLeftWidth: 6,
     borderLeftColor: '#dc2626',
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 20,
   },
-  exportMiniButton: {
-    backgroundColor: '#16a34a',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+
+  // Period Selector
+  periodSelector: {
+    flexDirection: 'row',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    padding: 4,
+  },
+  periodButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
     borderRadius: 8,
   },
-  exportMiniText: {
+  periodButtonActive: {
+    backgroundColor: '#dc2626',
+  },
+  periodButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  periodButtonTextActive: {
     color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  
-  // Heatmap Styles
-  heatmapContainer: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 15,
-  },
-  heatmapHeader: {
-    marginBottom: 15,
-  },
-  heatmapTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#334155',
-    textAlign: 'center',
-  },
-  heatmapGrid: {
-    marginBottom: 15,
-  },
-  heatmapRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  heatmapDayLabel: {
-    width: 40,
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#64748b',
-  },
-  heatmapCell: {
-    width: 16,
-    height: 16,
-    marginRight: 2,
-    borderRadius: 2,
-  },
-  heatmapLegend: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  legendText: {
-    fontSize: 12,
-    color: '#64748b',
-    marginHorizontal: 8,
-  },
-  legendGradient: {
-    flexDirection: 'row',
-  },
-  legendColor: {
-    width: 12,
-    height: 12,
-    marginHorizontal: 1,
-    borderRadius: 2,
   },
 
-  // Route Analysis
-  routeAnalysisContainer: {
-    marginTop: 15,
+  // Admin Metrics
+  adminMetricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
-  routeAnalysisItem: {
+  adminMetricCard: {
+    width: (width - 80) / 2,
     backgroundColor: '#f8fafc',
     padding: 20,
     borderRadius: 16,
-    marginBottom: 15,
-    borderLeftWidth: 4,
-    borderLeftColor: '#dc2626',
-  },
-  routeInfo: {
-    marginBottom: 10,
-  },
-  routeName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 4,
-  },
-  routePassengers: {
-    fontSize: 14,
-    color: '#64748b',
-  },
-  routeMetrics: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  routeMetric: {
     alignItems: 'center',
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
-  routeMetricValue: {
-    fontSize: 18,
+  adminMetricIcon: {
+    fontSize: 28,
+    marginBottom: 10,
+  },
+  adminMetricValue: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#dc2626',
+    marginBottom: 5,
   },
-  routeMetricLabel: {
+  adminMetricLabel: {
     fontSize: 12,
     color: '#64748b',
-    marginTop: 2,
-  },
-  routeProgressBar: {
-    height: 6,
-    backgroundColor: '#e2e8f0',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  routeProgress: {
-    height: '100%',
-    backgroundColor: '#16a34a',
-    borderRadius: 3,
-  },
-
-  // Chart Sections
-  chartSection: {
-    marginVertical: 20,
-    padding: 20,
-    backgroundColor: '#f8fafc',
-    borderRadius: 16,
-  },
-  chartSectionTitle: {
-    fontSize: 16,
+    marginBottom: 5,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
     fontWeight: '600',
-    color: '#334155',
-    marginBottom: 15,
-    textAlign: 'center',
+  },
+  adminMetricTrend: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  trendGood: {
+    color: '#16a34a',
+  },
+  trendBad: {
+    color: '#dc2626',
   },
 
-  // Line Chart
-  lineChart: {
+  // Simple Chart
+  simpleChart: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    height: 100,
-    position: 'relative',
-    marginBottom: 15,
+    height: 140,
+    paddingHorizontal: 10,
+    marginVertical: 20,
   },
-  lineChartPoint: {
+  chartColumn: {
     alignItems: 'center',
     flex: 1,
-    height: '100%',
-    position: 'relative',
   },
-  lineChartDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#dc2626',
-    position: 'absolute',
+  chartBar: {
+    width: 24,
+    height: 100,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    justifyContent: 'flex-end',
+    marginBottom: 8,
   },
-  lineChartLabel: {
-    fontSize: 10,
+  chartBarFill: {
+    borderRadius: 12,
+    minHeight: 8,
+  },
+  chartLabel: {
+    fontSize: 11,
     color: '#64748b',
-    position: 'absolute',
-    bottom: -20,
+    marginTop: 6,
+    fontWeight: '500',
+  },
+  chartValue: {
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  chartDescription: {
+    textAlign: 'center',
+    fontSize: 13,
+    color: '#64748b',
+    fontStyle: 'italic',
+    marginBottom: 15,
   },
 
-  // Bar Chart
-  barChart: {
+  // Chart Legend
+  chartLegend: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: '#f8fafc',
+    padding: 15,
+    borderRadius: 10,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 6,
+  },
+  legendText: {
+    fontSize: 11,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+
+  // Wait Time Chart
+  waitTimeChart: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     height: 120,
-    marginBottom: 15,
+    paddingHorizontal: 10,
+    marginVertical: 20,
   },
-  barChartColumn: {
+  waitTimeColumn: {
     alignItems: 'center',
     flex: 1,
   },
-  barChartBar: {
-    width: 20,
-    backgroundColor: '#dc2626',
-    borderRadius: 10,
+  waitTimeBar: {
+    width: 22,
+    height: 80,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 11,
+    justifyContent: 'flex-end',
     marginBottom: 8,
   },
-  barChartLabel: {
-    fontSize: 10,
-    color: '#64748b',
-    marginTop: 4,
+  waitTimeBarFill: {
+    borderRadius: 11,
+    minHeight: 6,
   },
-  barChartValue: {
-    fontSize: 10,
+  waitTimeValue: {
+    fontSize: 11,
     fontWeight: '600',
-    color: '#dc2626',
     marginTop: 2,
-  },
-
-  // Chart Stats
-  chartStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 8,
-  },
-  chartStat: {
-    fontSize: 12,
-    color: '#64748b',
-    fontWeight: '500',
+    color: '#333',
   },
 
   // Insights
@@ -578,18 +548,20 @@ const styles = StyleSheet.create({
     borderLeftColor: '#3b82f6',
   },
   insightsList: {
-    marginTop: 15,
+    marginTop: 10,
   },
   insightItem: {
     flexDirection: 'row',
     backgroundColor: '#f8fafc',
-    padding: 15,
-    borderRadius: 12,
+    padding: 18,
+    borderRadius: 15,
     marginBottom: 15,
+    alignItems: 'flex-start',
   },
   insightIcon: {
     fontSize: 24,
     marginRight: 15,
+    marginTop: 2,
   },
   insightContent: {
     flex: 1,
@@ -598,54 +570,67 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#334155',
-    marginBottom: 5,
+    marginBottom: 6,
   },
   insightText: {
     fontSize: 14,
     color: '#64748b',
     lineHeight: 20,
-    marginBottom: 8,
-  },
-  insightImpact: {
-    fontSize: 12,
-    color: '#16a34a',
-    fontWeight: '600',
   },
 
-  // Export Options
-  exportGrid: {
+  // Quick Report Actions
+  quickReportActions: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: 15,
   },
-  exportOptionButton: {
-    width: (width - 80) / 2,
-    backgroundColor: '#f1f5f9',
+  reportActionButton: {
+    flex: 1,
+    backgroundColor: '#16a34a',
     padding: 20,
     borderRadius: 16,
     alignItems: 'center',
-    marginBottom: 15,
-    borderWidth: 2,
-    borderColor: '#e2e8f0',
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  exportOptionIcon: {
+  reportActionIcon: {
     fontSize: 28,
     marginBottom: 8,
+    color: 'white',
   },
-  exportOptionText: {
+  reportActionText: {
+    color: 'white',
     fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
+    fontWeight: '700',
+    textAlign: 'center',
     marginBottom: 4,
   },
-  exportOptionDesc: {
+  reportActionDesc: {
+    color: 'rgba(255, 255, 255, 0.8)',
     fontSize: 12,
-    color: '#64748b',
     textAlign: 'center',
   },
+  reportGenerating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: '#fee2e2',
+    borderRadius: 10,
+  },
+  reportGeneratingText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: '#dc2626',
+    fontWeight: '500',
+  },
 
-  // Real-time Monitoring
-  monitoringCard: {
+  // Data Status
+  dataStatusCard: {
     backgroundColor: 'white',
     margin: 15,
     padding: 25,
@@ -656,50 +641,38 @@ const styles = StyleSheet.create({
     shadowRadius: 15,
     elevation: 10,
     borderLeftWidth: 6,
-    borderLeftColor: '#16a34a',
+    borderLeftColor: '#8b5cf6',
     marginBottom: 30,
   },
-  monitoringGrid: {
+  dataStatusGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  monitoringItem: {
+  dataStatusItem: {
     width: (width - 80) / 2,
-    backgroundColor: '#f0fdf4',
-    padding: 20,
+    backgroundColor: '#faf5ff',
+    padding: 18,
     borderRadius: 15,
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 12,
   },
-  monitoringIcon: {
+  dataStatusIcon: {
     fontSize: 24,
     marginBottom: 8,
   },
-  monitoringValue: {
-    fontSize: 24,
+  dataStatusValue: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#16a34a',
-    marginBottom: 5,
+    color: '#8b5cf6',
+    marginBottom: 4,
   },
-  monitoringLabel: {
-    fontSize: 12,
+  dataStatusLabel: {
+    fontSize: 11,
     color: '#64748b',
     textAlign: 'center',
-    marginBottom: 5,
-  },
-  monitoringStatus: {
-    fontSize: 10,
-    color: '#16a34a',
-    fontWeight: '600',
     textTransform: 'uppercase',
-    backgroundColor: '#dcfce7',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  alertStatus: {
-    color: '#dc2626',
-    backgroundColor: '#fee2e2',
+    letterSpacing: 1,
+    fontWeight: '600',
   },
 });
