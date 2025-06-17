@@ -224,7 +224,7 @@ export default function HomeScreen() {
             >
               <Text style={styles.quickActionIcon}>📈</Text>
               <Text style={styles.quickActionText}>ML Forecasting</Text>
-              <Text style={styles.quickActionDesc}>Prophet & LSTM models</Text>
+              <Text style={styles.quickActionDesc}>Prophet & LSTM & Hibrit models</Text>
             </TouchableOpacity>
           </View>
         </View>

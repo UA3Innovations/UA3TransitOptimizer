@@ -21,12 +21,63 @@ export const ReportsScreen: React.FC<Props> = ({
   reports,
   setReports
 }) => {
-  // Sample metrics for display
-  const metrics = {
-    avgWaitTime: 7.8,
-    occupancyRate: 66,
-    onTimePerf: 94,
+  // Period'a göre farklı metrikler
+  const getMetricsForPeriod = () => {
+    switch (reports.selectedPeriod) {
+      case 'today':
+        return {
+          avgWaitTime: 6.2,
+          occupancyRate: 58,
+          onTimePerf: 97,
+        };
+      case 'week':
+        return {
+          avgWaitTime: 7.8,
+          occupancyRate: 66,
+          onTimePerf: 94,
+        };
+      case 'month':
+        return {
+          avgWaitTime: 8.4,
+          occupancyRate: 72,
+          onTimePerf: 91,
+        };
+      default:
+        return {
+          avgWaitTime: 7.8,
+          occupancyRate: 66,
+          onTimePerf: 94,
+        };
+    }
   };
+
+  const metrics = getMetricsForPeriod();
+
+  // Period'a göre chart data
+  const getChartDataForPeriod = () => {
+    switch (reports.selectedPeriod) {
+      case 'today':
+        return [
+          { name: '6AM', waitTime: 5.2, occupancy: 45, onTime: 98 },
+          { name: '9AM', waitTime: 7.8, occupancy: 75, onTime: 95 },
+          { name: '12PM', waitTime: 6.5, occupancy: 65, onTime: 97 },
+          { name: '3PM', waitTime: 8.1, occupancy: 80, onTime: 94 },
+          { name: '6PM', waitTime: 9.2, occupancy: 85, onTime: 92 },
+          { name: '9PM', waitTime: 4.8, occupancy: 35, onTime: 99 },
+        ];
+      case 'month':
+        return [
+          { name: 'W1', waitTime: 8.2, occupancy: 68, onTime: 92 },
+          { name: 'W2', waitTime: 7.9, occupancy: 71, onTime: 93 },
+          { name: 'W3', waitTime: 8.8, occupancy: 74, onTime: 90 },
+          { name: 'W4', waitTime: 8.1, occupancy: 69, onTime: 91 },
+        ];
+      default: // week
+        return reports.chartData.daily;
+    }
+  };
+
+  const currentChartData = getChartDataForPeriod();
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -79,8 +130,8 @@ export const ReportsScreen: React.FC<Props> = ({
           </View>
           <Text style={styles.cardTitle}>Performance Summary</Text>
         </View>
-        <View style={styles.adminMetricsGrid}>
-          <View style={styles.adminMetricCard}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 16 }}>
+          <View style={{ flex: 1, backgroundColor: 'white', padding: 24, borderRadius: 20, alignItems: 'center', borderWidth: 2, borderColor: '#f1f5f9', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 8 }}>
             <View style={styles.metricIconContainer}>
               <Text style={styles.adminMetricIcon}>⏱️</Text>
             </View>
@@ -91,7 +142,7 @@ export const ReportsScreen: React.FC<Props> = ({
             </View>
           </View>
           
-          <View style={styles.adminMetricCard}>
+          <View style={{ flex: 1, backgroundColor: 'white', padding: 24, borderRadius: 20, alignItems: 'center', borderWidth: 2, borderColor: '#f1f5f9', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 8 }}>
             <View style={styles.metricIconContainer}>
               <Text style={styles.adminMetricIcon}>🚌</Text>
             </View>
@@ -102,7 +153,7 @@ export const ReportsScreen: React.FC<Props> = ({
             </View>
           </View>
           
-          <View style={styles.adminMetricCard}>
+          <View style={{ flex: 1, backgroundColor: 'white', padding: 24, borderRadius: 20, alignItems: 'center', borderWidth: 2, borderColor: '#f1f5f9', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 8 }}>
             <View style={styles.metricIconContainer}>
               <Text style={styles.adminMetricIcon}>🎯</Text>
             </View>
@@ -113,7 +164,7 @@ export const ReportsScreen: React.FC<Props> = ({
             </View>
           </View>
           
-          <View style={styles.adminMetricCard}>
+          <View style={{ flex: 1, backgroundColor: 'white', padding: 24, borderRadius: 20, alignItems: 'center', borderWidth: 2, borderColor: '#f1f5f9', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 8 }}>
             <View style={styles.metricIconContainer}>
               <Text style={styles.adminMetricIcon}>👥</Text>
             </View>
@@ -136,7 +187,7 @@ export const ReportsScreen: React.FC<Props> = ({
         </View>
         <View style={styles.chartContainer}>
           <View style={styles.simpleChart}>
-            {reports.chartData.daily.map((day, index) => {
+            {currentChartData.map((day, index) => {
               const performance = day.onTime;
               const isGood = performance >= 95;
               const isOk = performance >= 90;
@@ -164,7 +215,11 @@ export const ReportsScreen: React.FC<Props> = ({
               );
             })}
           </View>
-          <Text style={styles.chartDescription}>On-time performance by day</Text>
+          <Text style={styles.chartDescription}>
+            {reports.selectedPeriod === 'today' ? 'On-time performance by hour' :
+             reports.selectedPeriod === 'month' ? 'On-time performance by week' :
+             'On-time performance by day'}
+          </Text>
         </View>
         
         <View style={styles.chartLegend}>
@@ -193,7 +248,7 @@ export const ReportsScreen: React.FC<Props> = ({
         </View>
         <View style={styles.chartContainer}>
           <View style={styles.waitTimeChart}>
-            {reports.chartData.daily.map((day, index) => {
+            {currentChartData.map((day, index) => {
               const waitTime = day.waitTime;
               const barHeight = (waitTime / 10) * 100; // Max 10 minutes scale
               
@@ -218,7 +273,11 @@ export const ReportsScreen: React.FC<Props> = ({
               );
             })}
           </View>
-          <Text style={styles.chartDescription}>Average passenger wait time by day</Text>
+          <Text style={styles.chartDescription}>
+            {reports.selectedPeriod === 'today' ? 'Average wait time by hour' :
+             reports.selectedPeriod === 'month' ? 'Average wait time by week' :
+             'Average passenger wait time by day'}
+          </Text>
         </View>
       </View>
 
@@ -426,55 +485,70 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 16,
   },
   adminMetricCard: {
     width: (width - 86) / 2,
-    backgroundColor: '#f8fafc',
-    padding: 20,
+    backgroundColor: 'white',
+    padding: 24,
     borderRadius: 20,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderWidth: 2,
+    borderColor: '#f1f5f9',
     shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 8,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  metricIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#fef2f2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#fecaca',
+    shadowColor: '#dc2626',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
-  metricIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
   adminMetricIcon: {
-    fontSize: 20,
+    fontSize: 24,
   },
   adminMetricValue: {
-    fontSize: 26,
-    fontWeight: '800',
+    fontSize: 28,
+    fontWeight: '900',
     color: '#dc2626',
-    marginBottom: 6,
+    marginBottom: 8,
     letterSpacing: 0.5,
   },
   adminMetricLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#64748b',
-    marginBottom: 8,
+    marginBottom: 12,
     fontWeight: '700',
-    letterSpacing: 1,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
   },
   trendContainer: {
-    backgroundColor: 'rgba(22, 163, 74, 0.1)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   adminMetricTrend: {
     fontSize: 12,
@@ -581,9 +655,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    height: 100,
-    paddingHorizontal: 8,
-    marginBottom: 16,
+    height: 120,
+    paddingHorizontal: 12,
+    paddingTop: 28,
+    paddingBottom: 16,
+    marginBottom: 20,
   },
   waitTimeColumn: {
     alignItems: 'center',

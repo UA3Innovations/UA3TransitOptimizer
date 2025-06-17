@@ -28,14 +28,31 @@ export const OptimizationScreen: React.FC<Props> = ({
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>🧬 Genetic Algorithm Engine</Text>
-        <Text style={styles.sectionSubtitle}>Advanced multi-objective optimization system</Text>
+        <View style={styles.headerIconContainer}>
+          <Text style={styles.headerIcon}>🧬</Text>
+        </View>
+        <Text style={styles.sectionTitle}>Genetic Algorithm Engine</Text>
+        <View style={styles.sectionSubtitleContainer}>
+          <View style={styles.subtitleLine} />
+          <Text style={styles.sectionSubtitle}>Advanced Multi-Objective Optimization</Text>
+          <View style={styles.subtitleLine} />
+        </View>
       </View>
 
       <View style={styles.startCard}>
+        <View style={styles.cardTitleContainer}>
+          <View style={styles.cardIconContainer}>
+            <Text style={styles.cardIcon}>🎯</Text>
+          </View>
+          <Text style={styles.cardTitle}>Optimization Control</Text>
+        </View>
+
         <View style={styles.algorithmDescription}>
+          <View style={styles.descriptionIconContainer}>
+            <Text style={styles.descriptionIcon}>⚡</Text>
+          </View>
           <Text style={styles.descriptionText}>
-            🎯 Multi-objective genetic algorithm optimizing route efficiency, wait times, and passenger satisfaction simultaneously.
+            Multi-objective genetic algorithm optimizing route efficiency, wait times, and passenger satisfaction simultaneously.
           </Text>
         </View>
 
@@ -45,9 +62,11 @@ export const OptimizationScreen: React.FC<Props> = ({
           disabled={optimization.isRunning || uploadedFiles.length === 0}
         >
           <View style={styles.buttonContent}>
-            <Text style={styles.buttonIcon}>
-              {optimization.isRunning ? '⏳' : '🚀'}
-            </Text>
+            <View style={styles.buttonIconContainer}>
+              <Text style={styles.buttonIcon}>
+                {optimization.isRunning ? '⏳' : '🚀'}
+              </Text>
+            </View>
             <Text style={styles.primaryButtonText}>
               {optimization.isRunning ? 'Optimization Running...' : 'Start Genetic Optimization'}
             </Text>
@@ -55,41 +74,81 @@ export const OptimizationScreen: React.FC<Props> = ({
         </TouchableOpacity>
         
         {uploadedFiles.length === 0 && (
-          <Text style={styles.requirementText}>Upload data files to begin optimization</Text>
+          <View style={styles.requirementContainer}>
+            <Text style={styles.requirementText}>Upload data files to begin optimization</Text>
+          </View>
         )}
       </View>
 
       {optimization.isRunning && (
         <View style={styles.progressCard}>
-          <Text style={styles.cardTitle}>📈 Live Optimization Progress</Text>
-          <View style={styles.progressInfo}>
-            <Text style={styles.progressGeneration}>
-              Generation {optimization.generation} of {optimization.maxGenerations}
-            </Text>
-            <Text style={styles.progressPercent}>{optimization.progress.toFixed(1)}%</Text>
+          <View style={styles.cardTitleContainer}>
+            <View style={styles.cardIconContainer}>
+              <Text style={styles.cardIcon}>📈</Text>
+            </View>
+            <Text style={styles.cardTitle}>Live Optimization Progress</Text>
           </View>
-          <View style={styles.progressBarContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${optimization.progress}%` }]} />
+          
+          <View style={styles.progressContainer}>
+            <View style={styles.progressInfo}>
+              <View style={styles.progressInfoItem}>
+                <Text style={styles.progressLabel}>Generation</Text>
+                <Text style={styles.progressGeneration}>
+                  {optimization.generation} / {optimization.maxGenerations}
+                </Text>
+              </View>
+              <View style={styles.progressPercentContainer}>
+                <Text style={styles.progressPercent}>{optimization.progress.toFixed(1)}%</Text>
+              </View>
+            </View>
+            
+            <View style={styles.progressBarContainer}>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: `${optimization.progress}%` }]} />
+              </View>
             </View>
           </View>
+
           <View style={styles.optimizationDetails}>
-            <Text style={styles.detailItem}>
-              🧬 Evolving population for optimal route configurations
-            </Text>
-            <Text style={styles.detailItem}>
-              📊 Current Fitness: {optimization.fitnessHistory[optimization.fitnessHistory.length - 1]?.toFixed(2) || 'Calculating...'}
-            </Text>
-            <Text style={styles.detailItem}>
-              ⏱️ ETA: {Math.max(0, parseInt(optimization.maxGenerations) - optimization.generation) * 0.2} seconds
-            </Text>
+            <View style={styles.detailItem}>
+              <View style={styles.detailIconContainer}>
+                <Text style={styles.detailIcon}>🧬</Text>
+              </View>
+              <Text style={styles.detailText}>
+                Evolving population for optimal route configurations
+              </Text>
+            </View>
+            
+            <View style={styles.detailItem}>
+              <View style={styles.detailIconContainer}>
+                <Text style={styles.detailIcon}>📊</Text>
+              </View>
+              <Text style={styles.detailText}>
+                Current Fitness: {optimization.fitnessHistory[optimization.fitnessHistory.length - 1]?.toFixed(2) || 'Calculating...'}
+              </Text>
+            </View>
+            
+            <View style={styles.detailItem}>
+              <View style={styles.detailIconContainer}>
+                <Text style={styles.detailIcon}>⏱️</Text>
+              </View>
+              <Text style={styles.detailText}>
+                ETA: {Math.max(0, parseInt(optimization.maxGenerations) - optimization.generation) * 0.2} seconds
+              </Text>
+            </View>
           </View>
         </View>
       )}
 
       {optimization.fitnessHistory.length > 0 && (
         <View style={styles.chartCard}>
-          <Text style={styles.cardTitle}>📊 Fitness Evolution</Text>
+          <View style={styles.cardTitleContainer}>
+            <View style={[styles.cardIconContainer, styles.chartCardIconContainer]}>
+              <Text style={styles.cardIcon}>📊</Text>
+            </View>
+            <Text style={styles.cardTitle}>Fitness Evolution</Text>
+          </View>
+          
           <View style={styles.chartContainer}>
             <View style={styles.chart}>
               {optimization.fitnessHistory.slice(-20).map((fitness, index) => (
@@ -107,6 +166,25 @@ export const OptimizationScreen: React.FC<Props> = ({
               ))}
             </View>
             <Text style={styles.chartDescription}>Last 20 generations fitness values</Text>
+            
+            <View style={styles.fitnessStats}>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Best</Text>
+                <Text style={styles.statValue}>{Math.max(...optimization.fitnessHistory).toFixed(2)}</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Average</Text>
+                <Text style={styles.statValue}>
+                  {(optimization.fitnessHistory.reduce((a, b) => a + b, 0) / optimization.fitnessHistory.length).toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Current</Text>
+                <Text style={styles.statValue}>
+                  {optimization.fitnessHistory[optimization.fitnessHistory.length - 1]?.toFixed(2) || '0.00'}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
       )}
@@ -122,195 +200,351 @@ const styles = StyleSheet.create({
   sectionHeader: {
     backgroundColor: 'white',
     margin: 15,
-    padding: 25,
-    borderRadius: 25,
+    padding: 28,
+    borderRadius: 24,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
-    borderLeftWidth: 6,
-    borderLeftColor: '#dc2626',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  headerIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#fef2f2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#fecaca',
+  },
+  headerIcon: {
+    fontSize: 28,
   },
   sectionTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#1e293b',
+    marginBottom: 16,
     textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+  sectionSubtitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  subtitleLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e2e8f0',
   },
   sectionSubtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 14,
+    color: '#64748b',
     textAlign: 'center',
+    fontWeight: '600',
+    marginHorizontal: 16,
+    letterSpacing: 0.5,
   },
   startCard: {
     backgroundColor: 'white',
     margin: 15,
-    padding: 25,
-    borderRadius: 25,
+    padding: 24,
+    borderRadius: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
-    borderLeftWidth: 6,
-    borderLeftColor: '#dc2626',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  cardTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  cardIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fef2f2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+  },
+  cardIcon: {
+    fontSize: 18,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1e293b',
+    letterSpacing: 0.5,
   },
   algorithmDescription: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: '#fffbeb',
     padding: 20,
-    borderRadius: 15,
-    marginBottom: 25,
-    borderLeftWidth: 4,
-    borderLeftColor: '#f59e0b',
+    borderRadius: 16,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: '#fed7aa',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  descriptionIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff7ed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    borderWidth: 1,
+    borderColor: '#fed7aa',
+  },
+  descriptionIcon: {
+    fontSize: 18,
   },
   descriptionText: {
-    fontSize: 16,
+    flex: 1,
+    fontSize: 15,
     color: '#92400e',
     lineHeight: 22,
-    textAlign: 'center',
+    fontWeight: '600',
   },
   primaryButton: {
     backgroundColor: '#dc2626',
-    borderRadius: 15,
+    borderRadius: 18,
     overflow: 'hidden',
     shadowColor: '#dc2626',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 12,
   },
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 18,
+    padding: 20,
+  },
+  buttonIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   buttonIcon: {
-    fontSize: 18,
-    marginRight: 10,
+    fontSize: 16,
     color: 'white',
   },
   primaryButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '700',
-    textTransform: 'uppercase',
+    fontWeight: '800',
     letterSpacing: 1,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#e2e8f0',
     shadowOpacity: 0,
+  },
+  requirementContainer: {
+    backgroundColor: '#fef3f2',
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#fecaca',
   },
   requirementText: {
     fontSize: 14,
-    color: '#666',
+    color: '#dc2626',
     textAlign: 'center',
-    marginTop: 10,
-    fontStyle: 'italic',
+    fontWeight: '600',
   },
   progressCard: {
     backgroundColor: 'white',
     margin: 15,
-    padding: 25,
-    borderRadius: 25,
+    padding: 24,
+    borderRadius: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
-    borderLeftWidth: 6,
-    borderLeftColor: '#dc2626',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
   },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+  progressContainer: {
+    backgroundColor: '#f8fafc',
+    padding: 20,
+    borderRadius: 16,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   progressInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 16,
+  },
+  progressInfoItem: {
+    flex: 1,
+  },
+  progressLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '600',
+    letterSpacing: 1,
+    marginBottom: 4,
   },
   progressGeneration: {
     fontSize: 16,
-    color: '#333',
-    fontWeight: '600',
+    color: '#1e293b',
+    fontWeight: '700',
+  },
+  progressPercentContainer: {
+    backgroundColor: '#dc2626',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
   },
   progressPercent: {
     fontSize: 18,
-    color: '#dc2626',
-    fontWeight: 'bold',
+    color: 'white',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   progressBarContainer: {
     width: '100%',
-    marginBottom: 15,
   },
   progressBar: {
-    height: 12,
-    backgroundColor: '#fecaca',
-    borderRadius: 6,
+    height: 8,
+    backgroundColor: '#fee2e2',
+    borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: '#dc2626',
-    borderRadius: 6,
+    borderRadius: 4,
   },
   optimizationDetails: {
-    marginTop: 15,
-    padding: 15,
-    backgroundColor: '#fef2f2',
-    borderRadius: 10,
+    gap: 12,
   },
   detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  detailIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  detailIcon: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 5,
+  },
+  detailText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#64748b',
+    fontWeight: '600',
   },
   chartCard: {
     backgroundColor: 'white',
     margin: 15,
-    padding: 25,
-    borderRadius: 25,
+    padding: 24,
+    borderRadius: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 10,
-    borderLeftWidth: 6,
-    borderLeftColor: '#16a34a',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  chartCardIconContainer: {
+    backgroundColor: '#f0fdf4',
+    borderColor: '#bbf7d0',
   },
   chartContainer: {
-    marginTop: 15,
+    backgroundColor: '#f8fafc',
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   chart: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    height: 120,
+    height: 100,
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
+    marginBottom: 16,
   },
   chartBar: {
-    width: 8,
+    width: 6,
     height: '100%',
     justifyContent: 'flex-end',
-    backgroundColor: '#f1f5f9',
-    borderRadius: 4,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 3,
   },
   chartBarFill: {
-    borderRadius: 4,
-    minHeight: 4,
+    borderRadius: 3,
+    minHeight: 2,
   },
   chartDescription: {
     textAlign: 'center',
     fontSize: 12,
     color: '#64748b',
-    marginTop: 10,
-    fontStyle: 'italic',
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  fitnessStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: '#f1f5f9',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: 11,
+    color: '#64748b',
+    fontWeight: '600',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 16,
+    color: '#1e293b',
+    fontWeight: '800',
   },
 });
