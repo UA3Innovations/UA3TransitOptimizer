@@ -30,6 +30,19 @@ export const SimulationScreen: React.FC<Props> = ({
 }) => {
   const hasUploadedFiles = uploadedFiles.length > 0;
 
+  // Tarih validasyonu YYYY-MM-DD formatı için
+  const isValidDate = (dateStr: string): boolean => {
+    if (!dateStr || dateStr.length !== 10) return false;
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(dateStr)) return false;
+    
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.getFullYear() === year && 
+           date.getMonth() === month - 1 && 
+           date.getDate() === day;
+  };
+
   const handleRunSimulation = () => {
     if (hasUploadedFiles) {
       Alert.alert(
@@ -44,6 +57,27 @@ export const SimulationScreen: React.FC<Props> = ({
       );
       return;
     }
+
+    // Tarih validasyonu
+    if (!isValidDate(simulation.startDate)) {
+      Alert.alert('Hata', 'Başlangıç tarihi geçerli değil. Format: DD-MM-YYYY');
+      return;
+    }
+
+    if (!isValidDate(simulation.endDate)) {
+      Alert.alert('Hata', 'Bitiş tarihi geçerli değil. Format: DD-MM-YYYY');
+      return;
+    }
+
+    // Tarih mantık kontrolü (YYYY-MM-DD formatında)
+    const startDate = new Date(simulation.startDate);
+    const endDate = new Date(simulation.endDate);
+    
+    if (startDate >= endDate) {
+      Alert.alert('Hata', 'Başlangıç tarihi bitiş tarihinden önce olmalı');
+      return;
+    }
+
     onRunSimulation();
   };
 
@@ -108,13 +142,27 @@ export const SimulationScreen: React.FC<Props> = ({
               <Text style={styles.inputLabel}>Start Date</Text>
             </View>
             <TextInput
-              style={[styles.numberInput, hasUploadedFiles && styles.disabledInput]}
-              value={simulation.startDate || '01-01-2024'}
-              onChangeText={hasUploadedFiles ? undefined : (text) => setSimulation(prev => ({ ...prev, startDate: text }))}
-              placeholder="DD-MM-YYYY"
+              style={[
+                styles.numberInput, 
+                hasUploadedFiles && styles.disabledInput,
+                !isValidDate(simulation.startDate) && simulation.startDate && styles.errorInput
+              ]}
+              value={simulation.startDate || '2024-01-01'}
+              onChangeText={hasUploadedFiles ? undefined : (text) => {
+                setSimulation(prev => ({ ...prev, startDate: text }));
+              }}
+              placeholder="YYYY-MM-DD"
               editable={!hasUploadedFiles}
+              maxLength={10}
             />
-            <Text style={styles.inputHint}>Format: DD-MM-YYYY</Text>
+            <Text style={[
+              styles.inputHint,
+              !isValidDate(simulation.startDate) && simulation.startDate && styles.errorHint
+            ]}>
+              {!isValidDate(simulation.startDate) && simulation.startDate 
+                ? 'Geçersiz tarih formatı!' 
+                : 'Format: YYYY-MM-DD (örn: 2024-01-01)'}
+            </Text>
           </View>
 
           <View style={styles.inputGroup}>
@@ -125,13 +173,27 @@ export const SimulationScreen: React.FC<Props> = ({
               <Text style={styles.inputLabel}>End Date</Text>
             </View>
             <TextInput
-              style={[styles.numberInput, hasUploadedFiles && styles.disabledInput]}
-              value={simulation.endDate || '07-01-2024'}
-              onChangeText={hasUploadedFiles ? undefined : (text) => setSimulation(prev => ({ ...prev, endDate: text }))}
-              placeholder="DD-MM-YYYY"
+              style={[
+                styles.numberInput, 
+                hasUploadedFiles && styles.disabledInput,
+                !isValidDate(simulation.endDate) && simulation.endDate && styles.errorInput
+              ]}
+              value={simulation.endDate || '2024-01-07'}
+              onChangeText={hasUploadedFiles ? undefined : (text) => {
+                setSimulation(prev => ({ ...prev, endDate: text }));
+              }}
+              placeholder="YYYY-MM-DD"
               editable={!hasUploadedFiles}
+              maxLength={10}
             />
-            <Text style={styles.inputHint}>Format: DD-MM-YYYY</Text>
+            <Text style={[
+              styles.inputHint,
+              !isValidDate(simulation.endDate) && simulation.endDate && styles.errorHint
+            ]}>
+              {!isValidDate(simulation.endDate) && simulation.endDate 
+                ? 'Geçersiz tarih formatı!' 
+                : 'Format: YYYY-MM-DD (örn: 2024-01-07)'}
+            </Text>
           </View>
         </View>
 
@@ -179,10 +241,14 @@ export const SimulationScreen: React.FC<Props> = ({
         <TouchableOpacity
           style={[
             styles.primaryButton, 
-            (simulation.isRunning || hasUploadedFiles) && styles.disabledButton
+            (simulation.isRunning || hasUploadedFiles || 
+             !isValidDate(simulation.startDate) || 
+             !isValidDate(simulation.endDate)) && styles.disabledButton
           ]}
           onPress={handleRunSimulation}
-          disabled={simulation.isRunning || hasUploadedFiles}
+          disabled={simulation.isRunning || hasUploadedFiles || 
+                   !isValidDate(simulation.startDate) || 
+                   !isValidDate(simulation.endDate)}
         >
           <View style={styles.buttonContent}>
             <View style={styles.buttonIconContainer}>
@@ -194,14 +260,20 @@ export const SimulationScreen: React.FC<Props> = ({
             </View>
             <Text style={styles.primaryButtonText}>
               {simulation.isRunning ? `Simulation Running... ${simulation.progress}%` : 
-               hasUploadedFiles ? 'Real Data Available - Use Other Tools' : 'Start Simulation'}
+               hasUploadedFiles ? 'Real Data Available - Use Other Tools' : 
+               (!isValidDate(simulation.startDate) || !isValidDate(simulation.endDate)) ? 'Check Date Format' :
+               'Start Simulation'}
             </Text>
           </View>
         </TouchableOpacity>
         
         {!hasUploadedFiles && (
           <View style={styles.requirementContainer}>
-            <Text style={styles.requirementText}>Simulation generates data when you don't have real data files</Text>
+            <Text style={styles.requirementText}>
+              {(!isValidDate(simulation.startDate) || !isValidDate(simulation.endDate)) 
+                ? 'Please enter valid dates in YYYY-MM-DD format'
+                : 'Simulation generates data when you don\'t have real data files'}
+            </Text>
           </View>
         )}
       </View>
@@ -237,15 +309,77 @@ export const SimulationScreen: React.FC<Props> = ({
           <View style={styles.simulationStats}>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Start</Text>
-              <Text style={styles.statValue}>{simulation.startDate || '01-01-2024'}</Text>
+              <Text style={styles.statValue}>{simulation.startDate || '2024-01-01'}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>End</Text>
-              <Text style={styles.statValue}>{simulation.endDate || '07-01-2024'}</Text>
+              <Text style={styles.statValue}>{simulation.endDate || '2024-01-07'}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>ETA</Text>
               <Text style={styles.statValue}>{Math.max(0, (100 - simulation.progress) * 0.3).toFixed(1)}s</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Results Card */}
+      {simulation.results && !simulation.isRunning && (
+        <View style={styles.resultsCard}>
+          <View style={styles.cardTitleContainer}>
+            <View style={styles.cardIconContainer}>
+              <Text style={styles.cardIcon}>📊</Text>
+            </View>
+            <Text style={styles.cardTitle}>Simulation Results</Text>
+          </View>
+          
+          <View style={styles.resultsGrid}>
+            <View style={styles.resultItem}>
+              <Text style={styles.resultLabel}>Total Passengers</Text>
+              <Text style={styles.resultValue}>{simulation.results.totalPassengers?.toLocaleString() || 0}</Text>
+            </View>
+            <View style={styles.resultItem}>
+              <Text style={styles.resultLabel}>Total Boardings</Text>
+              <Text style={styles.resultValue}>{simulation.results.totalBoardings?.toLocaleString() || simulation.results.busAssignments || 0}</Text>
+            </View>
+            <View style={styles.resultItem}>
+              <Text style={styles.resultLabel}>Total Alightings</Text>
+              <Text style={styles.resultValue}>{simulation.results.totalAlightings?.toLocaleString() || 0}</Text>
+            </View>
+            <View style={styles.resultItem}>
+              <Text style={styles.resultLabel}>Overcrowding Rate</Text>
+              <Text style={styles.resultValue}>{simulation.results.overcrowdingPercentage?.toFixed(1) || 0}%</Text>
+            </View>
+            <View style={styles.resultItem}>
+              <Text style={styles.resultLabel}>Severe Overcrowding</Text>
+              <Text style={styles.resultValue}>{simulation.results.severeOvercrowdingPercentage?.toFixed(1) || simulation.results.maxOccupancy || 0}%</Text>
+            </View>
+            <View style={styles.resultItem}>
+              <Text style={styles.resultLabel}>Overcrowded Instances</Text>
+              <Text style={styles.resultValue}>{simulation.results.overcrowdedInstances?.toLocaleString() || 0}</Text>
+            </View>
+          </View>
+          
+          {/* Summary Box */}
+          <View style={styles.summaryBox}>
+            <View style={styles.summaryHeader}>
+              <Text style={styles.summaryIcon}>📈</Text>
+              <Text style={styles.summaryTitle}>Key Insights</Text>
+            </View>
+            <View style={styles.summaryContent}>
+              <Text style={styles.summaryText}>
+                • {simulation.results.totalPassengers?.toLocaleString() || 0} passengers simulated over the period
+              </Text>
+              <Text style={styles.summaryText}>
+                • {simulation.results.overcrowdingPercentage?.toFixed(1) || 0}% of instances experienced overcrowding
+              </Text>
+              <Text style={styles.summaryText}>
+                • {simulation.results.severeOvercrowdingPercentage?.toFixed(1) || 0}% had severe overcrowding (150% capacity)
+              </Text>
+              <Text style={styles.summaryText}>
+                • Peak efficiency: {simulation.results.totalBoardings && simulation.results.totalAlightings ? 
+                    ((simulation.results.totalAlightings / simulation.results.totalBoardings) * 100).toFixed(1) : 0}% passenger completion rate
+              </Text>
             </View>
           </View>
         </View>
@@ -437,6 +571,56 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+  },
+  errorInput: {
+    borderColor: '#ef4444',
+    backgroundColor: '#fef2f2',
+  },
+  errorHint: {
+    color: '#ef4444',
+    fontWeight: '600',
+  },
+  resultsCard: {
+    backgroundColor: 'white',
+    margin: 15,
+    padding: 24,
+    borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  resultsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  resultItem: {
+    flex: 1,
+    minWidth: '30%',
+    backgroundColor: '#f0f9ff',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+  },
+  resultLabel: {
+    fontSize: 12,
+    color: '#1e40af',
+    fontWeight: '600',
+    letterSpacing: 1,
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  resultValue: {
+    fontSize: 16,
+    color: '#1e3a8a',
+    fontWeight: '800',
+    textAlign: 'center',
   },
   inputLabelContainer: {
     flexDirection: 'row',
@@ -699,5 +883,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#78350f',
     fontWeight: '800',
+  },
+  summaryBox: {
+    backgroundColor: '#f0f9ff',
+    padding: 20,
+    borderRadius: 16,
+    marginTop: 20,
+    borderWidth: 2,
+    borderColor: '#bae6fd',
+  },
+  summaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  summaryIcon: {
+    fontSize: 20,
+    marginRight: 10,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1e40af',
+    letterSpacing: 0.5,
+  },
+  summaryContent: {
+    gap: 8,
+  },
+  summaryText: {
+    fontSize: 14,
+    color: '#1e40af',
+    fontWeight: '600',
+    lineHeight: 20,
   },
 });

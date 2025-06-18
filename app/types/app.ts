@@ -48,20 +48,32 @@ export interface ForecastingState {
     improvement: number;
   };
 }
+
+// Simulasyon sonuçları için ayrı interface
+export interface SimulationResults {
+  totalPassengers: number;
+  busAssignments: number;
+  stopUtilization: string;
+  maxOccupancy: number;
+  totalBoardings?: number;
+  totalAlightings?: number;
+  overcrowdedInstances?: number;
+  overcrowdingPercentage?: number;
+  severeOvercrowding?: number;
+  severeOvercrowdingPercentage?: number;
+}
+
+// Simulasyon state'i için güncellenmiş interface
 export interface SimulationState {
   isRunning: boolean;
-  startDate?: string;  // Yeni eklenen
-  endDate?: string;    // Yeni eklenen
-  duration: string;    // Eski - opsiyonel tutabilirsiniz
-  timeStep: string;    // Eski - opsiyonel tutabilirsiniz
-  results: {
-    totalPassengers: number;
-    busAssignments: number;
-    stopUtilization: string;
-    maxOccupancy: number;
-  };
+  startDate: string;
+  endDate: string;
+  duration: string;
+  timeStep: string;
   progress: number;
+  results: SimulationResults; // Sonuçlar ayrı interface'de
 }
+
 export interface ReportsState {
   isGenerating: boolean;
   selectedPeriod: string;

@@ -43,10 +43,9 @@ export default function HomeScreen() {
   const { metrics, setMetrics } = useMetrics(user);
   const { uploadedFiles, setUploadedFiles, isUploading, handleFileUpload, clearFiles } = useFileUpload();
   const { aiProcess, startAIProcess } = useAIProcess(uploadedFiles, setMetrics);
-
-  const { optimization, setOptimization, startOptimization } = useOptimization(uploadedFiles, setMetrics);
   const { simulation, setSimulation, runSimulation } = useSimulation(uploadedFiles);
-  const { forecasting, setForecasting, runProphetModel, runLSTMModel } = useForecasting(uploadedFiles);
+  const { optimization, setOptimization, startOptimization } = useOptimization(uploadedFiles, simulation, setMetrics)
+  const { forecasting, setForecasting, runProphetModel, runLSTMModel } = useForecasting(uploadedFiles, simulation)
 
   // App State
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
@@ -232,7 +231,8 @@ export default function HomeScreen() {
     </ScrollView>
   );
 
-  // renderContent fonksiyonunu güncelleyin:
+  // Ana index.tsx dosyasında renderContent fonksiyonunu güncelleyin:
+
   const renderContent = () => {
     if (user?.role === 'admin') {
       if (currentTab === 'reports') {
@@ -248,7 +248,7 @@ export default function HomeScreen() {
       }
       return renderDashboard();
     } else {
-      // Developer view (mevcut kod aynı kalacak)
+      // Developer view - simulation prop'u eklendi
       switch (currentTab) {
         case 'dashboard':
           return renderDashboard();
@@ -258,6 +258,7 @@ export default function HomeScreen() {
               optimization={optimization}
               setOptimization={setOptimization}
               uploadedFiles={uploadedFiles}
+              simulation={simulation} // ✅ Yeni eklenen prop
               onStartOptimization={startOptimization}
             />
           );
@@ -276,6 +277,7 @@ export default function HomeScreen() {
               forecasting={forecasting}
               setForecasting={setForecasting}
               uploadedFiles={uploadedFiles}
+              simulation={simulation} // ✅ Yeni eklenen prop
               onRunProphet={runProphetModel}
               onRunLSTM={runLSTMModel}
             />
@@ -289,7 +291,6 @@ export default function HomeScreen() {
           );
         default:
           return renderDashboard();
-
         case 'test':
           return <TestScreen />;
       }

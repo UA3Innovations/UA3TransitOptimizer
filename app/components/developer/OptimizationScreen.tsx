@@ -1,4 +1,4 @@
-// components/developer/OptimizationScreen.tsx
+// components/developer/OptimizationScreen.tsx (Updated)
 import React from 'react';
 import {
   Dimensions,
@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { OptimizationState, UploadedFile } from '../../types/app';
+import { OptimizationState, SimulationState, UploadedFile } from '../../types/app';
+import { DataFlowStatus } from '../common/DataFlowStatus';
 
 const { width } = Dimensions.get('window');
 
@@ -16,6 +17,7 @@ interface Props {
   optimization: OptimizationState;
   setOptimization: (value: OptimizationState | ((prev: OptimizationState) => OptimizationState)) => void;
   uploadedFiles: UploadedFile[];
+  simulation: SimulationState; // Yeni eklenen prop
   onStartOptimization: () => void;
 }
 
@@ -23,8 +25,14 @@ export const OptimizationScreen: React.FC<Props> = ({
   optimization,
   setOptimization,
   uploadedFiles,
+  simulation, // Yeni prop
   onStartOptimization
 }) => {
+  // Data availability check
+  const hasRealData = uploadedFiles.length > 0;
+  const hasSimulationData = simulation.results && simulation.results.totalPassengers > 0;
+  const canProceed = hasRealData || hasSimulationData;
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.sectionHeader}>
@@ -38,6 +46,13 @@ export const OptimizationScreen: React.FC<Props> = ({
           <View style={styles.subtitleLine} />
         </View>
       </View>
+
+      {/* Data Flow Status */}
+      <DataFlowStatus 
+        uploadedFiles={uploadedFiles}
+        simulation={simulation}
+        currentTool="genetic"
+      />
 
       <View style={styles.startCard}>
         <View style={styles.cardTitleContainer}>
@@ -57,9 +72,9 @@ export const OptimizationScreen: React.FC<Props> = ({
         </View>
 
         <TouchableOpacity
-          style={[styles.primaryButton, (optimization.isRunning || uploadedFiles.length === 0) && styles.disabledButton]}
+          style={[styles.primaryButton, (optimization.isRunning || !canProceed) && styles.disabledButton]}
           onPress={onStartOptimization}
-          disabled={optimization.isRunning || uploadedFiles.length === 0}
+          disabled={optimization.isRunning || !canProceed}
         >
           <View style={styles.buttonContent}>
             <View style={styles.buttonIconContainer}>
@@ -68,14 +83,29 @@ export const OptimizationScreen: React.FC<Props> = ({
               </Text>
             </View>
             <Text style={styles.primaryButtonText}>
-              {optimization.isRunning ? 'Optimization Running...' : 'Start Genetic Optimization'}
+              {optimization.isRunning ? 'Optimization Running...' : 
+               !canProceed ? 'Need Data to Start' :
+               'Start Genetic Optimization'}
             </Text>
           </View>
         </TouchableOpacity>
         
-        {uploadedFiles.length === 0 && (
+        {!canProceed && (
           <View style={styles.requirementContainer}>
-            <Text style={styles.requirementText}>Upload data files to begin optimization</Text>
+            <View style={styles.requirementHeader}>
+              <Text style={styles.requirementIcon}>💡</Text>
+              <Text style={styles.requirementTitle}>Next Steps</Text>
+            </View>
+            <View style={styles.requirementOptions}>
+              <View style={styles.requirementOption}>
+                <Text style={styles.optionNumber}>1</Text>
+                <Text style={styles.optionText}>Upload real transit data files, OR</Text>
+              </View>
+              <View style={styles.requirementOption}>
+                <Text style={styles.optionNumber}>2</Text>
+                <Text style={styles.optionText}>Go to Simulation tab and generate synthetic data</Text>
+              </View>
+            </View>
           </View>
         )}
       </View>
@@ -116,6 +146,16 @@ export const OptimizationScreen: React.FC<Props> = ({
               </View>
               <Text style={styles.detailText}>
                 Evolving population for optimal route configurations
+              </Text>
+            </View>
+            
+            <View style={styles.detailItem}>
+              <View style={styles.detailIconContainer}>
+                <Text style={styles.detailIcon}>📊</Text>
+              </View>
+              <Text style={styles.detailText}>
+                Data Source: {hasRealData ? `Real Data (${uploadedFiles.length} files)` : 
+                            hasSimulationData ? `Simulation (${simulation.results.totalPassengers.toLocaleString()} passengers)` : 'Unknown'}
               </Text>
             </View>
             
@@ -360,18 +400,57 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
   },
   requirementContainer: {
-    backgroundColor: '#fef3f2',
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor: '#f0f9ff',
+    padding: 20,
+    borderRadius: 16,
     marginTop: 16,
-    borderWidth: 1,
-    borderColor: '#fecaca',
+    borderWidth: 2,
+    borderColor: '#bae6fd',
   },
-  requirementText: {
+  requirementHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  requirementIcon: {
+    fontSize: 20,
+    marginRight: 10,
+  },
+  requirementTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1e40af',
+    letterSpacing: 0.3,
+  },
+  requirementOptions: {
+    gap: 12,
+  },
+  requirementOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0f2fe',
+  },
+  optionNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#3b82f6',
+    color: 'white',
     fontSize: 14,
-    color: '#dc2626',
+    fontWeight: '800',
     textAlign: 'center',
+    textAlignVertical: 'center',
+    marginRight: 12,
+  },
+  optionText: {
+    fontSize: 14,
+    color: '#1e40af',
     fontWeight: '600',
+    flex: 1,
   },
   progressCard: {
     backgroundColor: 'white',

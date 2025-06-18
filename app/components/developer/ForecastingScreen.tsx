@@ -1,4 +1,4 @@
-// components/developer/ForecastingScreen.tsx
+// components/developer/ForecastingScreen.tsx (Updated)
 import React from 'react';
 import {
   ActivityIndicator,
@@ -9,7 +9,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { ForecastingState, UploadedFile } from '../../types/app';
+import { ForecastingState, SimulationState, UploadedFile } from '../../types/app';
+import { DataFlowStatus } from '../common/DataFlowStatus';
 
 const { width } = Dimensions.get('window');
 
@@ -17,6 +18,7 @@ interface Props {
   forecasting: ForecastingState;
   setForecasting: (value: ForecastingState | ((prev: ForecastingState) => ForecastingState)) => void;
   uploadedFiles: UploadedFile[];
+  simulation: SimulationState; // Yeni eklenen prop
   onRunProphet: () => void;
   onRunLSTM: () => void;
 }
@@ -25,9 +27,15 @@ export const ForecastingScreen: React.FC<Props> = ({
   forecasting,
   setForecasting,
   uploadedFiles,
+  simulation, // Yeni prop
   onRunProphet,
   onRunLSTM
 }) => {
+  // Data availability check
+  const hasRealData = uploadedFiles.length > 0;
+  const hasSimulationData = simulation.results && simulation.results.totalPassengers > 0;
+  const canProceed = hasRealData || hasSimulationData;
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.sectionHeader}>
@@ -42,6 +50,13 @@ export const ForecastingScreen: React.FC<Props> = ({
         </View>
       </View>
 
+      {/* Data Flow Status */}
+      <DataFlowStatus 
+        uploadedFiles={uploadedFiles}
+        simulation={simulation}
+        currentTool="forecasting"
+      />
+
       <View style={styles.modelGrid}>
         {/* Prophet Model */}
         <View style={styles.modelCard}>
@@ -52,6 +67,16 @@ export const ForecastingScreen: React.FC<Props> = ({
               </View>
               <Text style={styles.modelTitle}>Prophet Model</Text>
             </View>
+            {hasRealData && (
+              <View style={styles.dataSourceBadge}>
+                <Text style={styles.dataSourceText}>📊 Real Data</Text>
+              </View>
+            )}
+            {!hasRealData && hasSimulationData && (
+              <View style={[styles.dataSourceBadge, styles.simulationBadge]}>
+                <Text style={styles.dataSourceText}>🎲 Simulation Data</Text>
+              </View>
+            )}
           </View>
           
           <Text style={styles.modelDescription}>
@@ -86,9 +111,9 @@ export const ForecastingScreen: React.FC<Props> = ({
           </View>
           
           <TouchableOpacity 
-            style={[styles.modelButton, (forecasting.prophetRunning || uploadedFiles.length === 0) && styles.disabledButton]}
+            style={[styles.modelButton, (forecasting.prophetRunning || !canProceed) && styles.disabledButton]}
             onPress={onRunProphet}
-            disabled={forecasting.prophetRunning || uploadedFiles.length === 0}
+            disabled={forecasting.prophetRunning || !canProceed}
           >
             <View style={styles.modelButtonContent}>
               <View style={styles.modelButtonIconContainer}>
@@ -99,7 +124,8 @@ export const ForecastingScreen: React.FC<Props> = ({
                 )}
               </View>
               <Text style={styles.modelButtonText}>
-                {forecasting.prophetRunning ? 'Running...' : 'Run Prophet'}
+                {forecasting.prophetRunning ? 'Running...' : 
+                 !canProceed ? 'Need Data' : 'Run Prophet'}
               </Text>
             </View>
           </TouchableOpacity>
@@ -114,6 +140,16 @@ export const ForecastingScreen: React.FC<Props> = ({
               </View>
               <Text style={styles.modelTitle}>LSTM Model</Text>
             </View>
+            {hasRealData && (
+              <View style={styles.dataSourceBadge}>
+                <Text style={styles.dataSourceText}>📊 Real Data</Text>
+              </View>
+            )}
+            {!hasRealData && hasSimulationData && (
+              <View style={[styles.dataSourceBadge, styles.simulationBadge]}>
+                <Text style={styles.dataSourceText}>🎲 Simulation Data</Text>
+              </View>
+            )}
           </View>
           
           <Text style={styles.modelDescription}>
@@ -148,9 +184,9 @@ export const ForecastingScreen: React.FC<Props> = ({
           </View>
           
           <TouchableOpacity 
-            style={[styles.modelButton, styles.lstmButton, (forecasting.lstmRunning || uploadedFiles.length === 0) && styles.disabledButton]}
+            style={[styles.modelButton, styles.lstmButton, (forecasting.lstmRunning || !canProceed) && styles.disabledButton]}
             onPress={onRunLSTM}
-            disabled={forecasting.lstmRunning || uploadedFiles.length === 0}
+            disabled={forecasting.lstmRunning || !canProceed}
           >
             <View style={styles.modelButtonContent}>
               <View style={styles.modelButtonIconContainer}>
@@ -161,7 +197,8 @@ export const ForecastingScreen: React.FC<Props> = ({
                 )}
               </View>
               <Text style={styles.modelButtonText}>
-                {forecasting.lstmRunning ? 'Running...' : 'Run LSTM'}
+                {forecasting.lstmRunning ? 'Running...' : 
+                 !canProceed ? 'Need Data' : 'Run LSTM'}
               </Text>
             </View>
           </TouchableOpacity>
@@ -176,6 +213,16 @@ export const ForecastingScreen: React.FC<Props> = ({
               </View>
               <Text style={styles.modelTitle}>Hybrid Model</Text>
             </View>
+            {hasRealData && (
+              <View style={styles.dataSourceBadge}>
+                <Text style={styles.dataSourceText}>📊 Real Data</Text>
+              </View>
+            )}
+            {!hasRealData && hasSimulationData && (
+              <View style={[styles.dataSourceBadge, styles.simulationBadge]}>
+                <Text style={styles.dataSourceText}>🎲 Simulation Data</Text>
+              </View>
+            )}
           </View>
           
           <Text style={styles.modelDescription}>
@@ -210,12 +257,12 @@ export const ForecastingScreen: React.FC<Props> = ({
           </View>
           
           <TouchableOpacity 
-            style={[styles.modelButton, styles.hybridButton, (forecasting.prophetRunning || forecasting.lstmRunning || uploadedFiles.length === 0) && styles.disabledButton]}
+            style={[styles.modelButton, styles.hybridButton, (forecasting.prophetRunning || forecasting.lstmRunning || !canProceed) && styles.disabledButton]}
             onPress={() => {
               onRunProphet();
               onRunLSTM();
             }}
-            disabled={forecasting.prophetRunning || forecasting.lstmRunning || uploadedFiles.length === 0}
+            disabled={forecasting.prophetRunning || forecasting.lstmRunning || !canProceed}
           >
             <View style={styles.modelButtonContent}>
               <View style={styles.modelButtonIconContainer}>
@@ -226,24 +273,13 @@ export const ForecastingScreen: React.FC<Props> = ({
                 )}
               </View>
               <Text style={styles.modelButtonText}>
-                {(forecasting.prophetRunning || forecasting.lstmRunning) ? 'Running Hybrid...' : 'Run Hybrid Model'}
+                {(forecasting.prophetRunning || forecasting.lstmRunning) ? 'Running Hybrid...' : 
+                 !canProceed ? 'Need Data' : 'Run Hybrid Model'}
               </Text>
             </View>
           </TouchableOpacity>
         </View>
       </View>
-
-      {uploadedFiles.length === 0 && (
-        <View style={styles.requirementCard}>
-          <View style={styles.requirementIconContainer}>
-            <Text style={styles.requirementIcon}>⚠️</Text>
-          </View>
-          <View style={styles.requirementContent}>
-            <Text style={styles.requirementTitle}>Data Required</Text>
-            <Text style={styles.requirementText}>Upload passenger data to train forecasting models</Text>
-          </View>
-        </View>
-      )}
 
       {/* Model Comparison */}
       <View style={styles.comparisonCard}>
@@ -296,6 +332,19 @@ export const ForecastingScreen: React.FC<Props> = ({
               </View>
               
               <View style={styles.comparisonRow}>
+                <Text style={styles.comparisonMetric}>Data Source</Text>
+                <Text style={[styles.comparisonValue, { textAlign: 'center' }]}>
+                  {hasRealData ? 'Real' : hasSimulationData ? 'Simulated' : 'None'}
+                </Text>
+                <Text style={[styles.comparisonValue, { textAlign: 'center' }]}>
+                  {hasRealData ? 'Real' : hasSimulationData ? 'Simulated' : 'None'}
+                </Text>
+                <Text style={[styles.comparisonValue, { textAlign: 'center' }]}>
+                  {hasRealData ? 'Real' : hasSimulationData ? 'Simulated' : 'None'}
+                </Text>
+              </View>
+              
+              <View style={styles.comparisonRow}>
                 <Text style={styles.comparisonMetric}>Training Speed</Text>
                 <View style={[styles.comparisonValueContainer, styles.bestValueContainer]}>
                   <Text style={[styles.comparisonValue, styles.comparisonBest]}>Fast</Text>
@@ -320,19 +369,6 @@ export const ForecastingScreen: React.FC<Props> = ({
                   <Text style={[styles.comparisonValue, styles.comparisonBest]}>Excellent</Text>
                 </View>
               </View>
-              
-              <View style={styles.comparisonRow}>
-                <Text style={styles.comparisonMetric}>Complexity</Text>
-                <View style={[styles.comparisonValueContainer, styles.bestValueContainer]}>
-                  <Text style={[styles.comparisonValue, styles.comparisonBest]}>Low</Text>
-                </View>
-                <View style={styles.comparisonValueContainer}>
-                  <Text style={styles.comparisonValue}>High</Text>
-                </View>
-                <View style={styles.comparisonValueContainer}>
-                  <Text style={styles.comparisonValue}>Medium</Text>
-                </View>
-              </View>
             </View>
           </View>
         ) : (
@@ -341,7 +377,11 @@ export const ForecastingScreen: React.FC<Props> = ({
               <Text style={styles.emptyComparisonIcon}>📊</Text>
             </View>
             <Text style={styles.emptyComparisonText}>Run models to see comparison results</Text>
-            <Text style={styles.emptyComparisonSubtext}>Start Prophet, LSTM, or Hybrid model to populate this section</Text>
+            <Text style={styles.emptyComparisonSubtext}>
+              {!canProceed 
+                ? 'Upload data or run simulation first' 
+                : 'Start Prophet, LSTM, or Hybrid model to populate this section'}
+            </Text>
           </View>
         )}
       </View>
@@ -425,11 +465,15 @@ const styles = StyleSheet.create({
     borderColor: '#f1f5f9',
   },
   modelHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
   },
   modelTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   modelIconContainer: {
     width: 40,
@@ -458,6 +502,24 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#1e293b',
     letterSpacing: 0.3,
+  },
+  dataSourceBadge: {
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+  },
+  simulationBadge: {
+    backgroundColor: '#dbeafe',
+    borderColor: '#bfdbfe',
+  },
+  dataSourceText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#16a34a',
+    letterSpacing: 0.5,
   },
   modelDescription: {
     fontSize: 14,
@@ -565,46 +627,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
   },
-  requirementCard: {
-    backgroundColor: '#fef3f2',
-    margin: 15,
-    marginBottom: 8,
-    padding: 20,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#fecaca',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  requirementIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#fee2e2',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-    borderWidth: 1,
-    borderColor: '#fecaca',
-  },
-  requirementIcon: {
-    fontSize: 18,
-  },
-  requirementContent: {
-    flex: 1,
-  },
-  requirementTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#dc2626',
-    marginBottom: 4,
-    letterSpacing: 0.3,
-  },
-  requirementText: {
-    fontSize: 14,
-    color: '#991b1b',
-    fontWeight: '500',
-  },
   comparisonCard: {
     backgroundColor: 'white',
     margin: 15,
@@ -676,6 +698,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     borderWidth: 1,
     borderColor: '#f1f5f9',
+    alignItems: 'center',
   },
   comparisonMetric: {
     flex: 1,

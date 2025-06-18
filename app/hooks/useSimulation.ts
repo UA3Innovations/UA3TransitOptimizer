@@ -7,61 +7,115 @@ import { SimulationState, UploadedFile } from '../types/app';
 export const useSimulation = (uploadedFiles: UploadedFile[]) => {
   const [simulation, setSimulation] = useState<SimulationState>({
     isRunning: false,
-    startDate: '01-01-2024',  // Yeni eklenen
-    endDate: '07-01-2024',    // Yeni eklenen
-    duration: '7',            // Eski - geriye uyumluluk için
-    timeStep: '5',            // Eski - geriye uyumluluk için
+    startDate: '2024-01-01',  // ✅ YYYY-MM-DD formatında varsayılan değer
+    endDate: '2024-01-07',    // ✅ YYYY-MM-DD formatında varsayılan değer
+    duration: '7',
+    timeStep: '5',
     results: {
-      totalPassengers: 346735,
-      busAssignments: 2429,
-      stopUtilization: '97.4',
-      maxOccupancy: 172
+      totalPassengers: 0,
+      busAssignments: 0,
+      stopUtilization: '0%',
+      maxOccupancy: 0,
     },
-    progress: 0
-});
+    progress: 0,
+  });
 
   const runSimulation = async () => {
-    if (simulation.isRunning) return;
-    if (uploadedFiles.length === 0) {
-      Alert.alert('Warning', 'Please upload data files first');
-      return;
-    }
-
+    // Simülasyon durumunu güncelle
     setSimulation(prev => ({ ...prev, isRunning: true, progress: 0 }));
 
     try {
-      const result = await APIService.runSimulation(
-        simulation.startDate || '01-01-2024', 
-        simulation.endDate || '07-01-2024'
-      );
-      
-      if (result.success) {
-        setSimulation(prev => ({
-          ...prev,
-          isRunning: false,
-          progress: 100,
-          results: {
-            totalPassengers: result.simulation_results.total_passengers,
-            busAssignments: result.simulation_results.bus_assignments,
-            stopUtilization: result.simulation_results.stop_utilization.toString(),
-            maxOccupancy: result.simulation_results.max_occupancy
-          }
-        }));
+      console.log('Sending simulation request:', { 
+        startDate: simulation.startDate, 
+        endDate: simulation.endDate 
+      });
 
-        Alert.alert(
-          'Success! 🎯', 
-          `Simulation completed for ${simulation.startDate} to ${simulation.endDate}!\n• Efficiency: ${result.simulation_results.efficiency_score}%\n• Cost reduction: ₺${result.simulation_results.cost_reduction}`
-        );
+      // API'ye doğrudan YYYY-MM-DD formatında gönder
+      const result = await APIService.runSimulation(simulation.startDate, simulation.endDate);
+
+      console.log('Simulation API response:', result);
+
+      if (result.status === 'started') {
+        Alert.alert('Başarılı', 'Simülasyon başlatıldı ve arka planda çalışıyor!');
+        
+        // Simulasyon durumunu periyodik olarak kontrol et
+        const checkInterval = setInterval(async () => {
+          try {
+            const statusResult = await APIService.getSimulationStatus();
+            console.log('Status check:', statusResult);
+            
+            if (!statusResult.is_running && statusResult.last_result) {
+              clearInterval(checkInterval);
+              
+              if (statusResult.last_result.status === 'completed') {
+                // Simulasyon tamamlandı, sonuçları al
+                const finalResults = statusResult.last_result.frontend_results || {
+                  totalPassengers: 0,
+                  busAssignments: 0,
+                  stopUtilization: "0%",
+                  maxOccupancy: 0
+                };
+                
+                setSimulation(prev => ({
+                  ...prev,
+                  progress: 100,
+                  isRunning: false,
+                  results: finalResults
+                }));
+                
+                Alert.alert('Tamamlandı!', 
+                  `Simülasyon başarıyla tamamlandı!\n\n` +
+                  `📊 Toplam Yolcu: ${finalResults.totalPassengers}\n` +
+                  `🚌 Toplam Biniş: ${finalResults.totalBoardings}\n` +
+                  `📈 Aşırı Doluluk: ${finalResults.overcrowdingPercentage}%`
+                );
+              } else {
+                // Simulasyon başarısız
+                setSimulation(prev => ({ ...prev, isRunning: false, progress: 0 }));
+                Alert.alert('Hata', `Simülasyon başarısız: ${statusResult.last_result.error || 'Bilinmeyen hata'}`);
+              }
+            } else {
+              // Hala çalışıyor, progress güncelle
+              setSimulation(prev => ({ 
+                ...prev, 
+                progress: Math.min(prev.progress + 15, 95) // Yavaşça artır
+              }));
+            }
+          } catch (error) {
+            console.error('Status check error:', error);
+          }
+        }, 2000); // Her 2 saniyede bir kontrol et
+        
+      } else {
+        Alert.alert('Hata', 'Simülasyon başlatılamadı');
+        setSimulation(prev => ({ ...prev, isRunning: false, progress: 0 }));
       }
+
     } catch (error) {
-      Alert.alert('Error', 'Failed to connect to Simulation API');
-      setSimulation(prev => ({ ...prev, isRunning: false }));
+      console.error('Simulation error:', error);
+      
+      let errorMessage = 'Simülasyon başarısız oldu.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('400')) {
+          errorMessage = 'Tarih formatı hatalı. YYYY-MM-DD formatını kullanın.';
+        } else if (error.message.includes('500')) {
+          errorMessage = 'Sunucu hatası. Lütfen tekrar deneyin.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Bağlantı hatası. İnternet bağlantınızı kontrol edin.';
+        } else {
+          errorMessage = `Hata: ${error.message}`;
+        }
+      }
+      
+      Alert.alert('Hata', errorMessage);
+      setSimulation(prev => ({ ...prev, isRunning: false, progress: 0 }));
     }
   };
 
   return {
     simulation,
     setSimulation,
-    runSimulation
+    runSimulation,
   };
 };
