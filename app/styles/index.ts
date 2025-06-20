@@ -1,4 +1,4 @@
-// styles/index.ts
+// styles/index.ts - Düzeltilmiş tam versiyon
 import { Dimensions, StyleSheet } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -535,5 +535,433 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
     letterSpacing: 0.5,
+  },
+
+  // ✅ PIPELINE STYLES - Tüm pipeline stilleri burada
+  // Pipeline Options Container
+  pipelineOptionsContainer: {
+    marginTop: 15,
+    gap: 12,
+  },
+  
+  fullPipelineButton: {
+    backgroundColor: '#eff6ff',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: '#3b82f6',
+  },
+  
+  configButton: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    alignItems: 'center',
+  },
+  
+  configButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6b7280',
+  },
+  
+  buttonTextContainer: {
+    flex: 1,
+  },
+  
+  buttonSubtext: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 2,
+  },
+  
+  // Pipeline Progress
+  processFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  
+  stopButton: {
+    backgroundColor: '#fee2e2',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#fca5a5',
+  },
+  
+  stopButtonText: {
+    color: '#dc2626',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  
+  // Steps Progress
+  stepsProgress: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
+  },
+  
+  stepsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 12,
+  },
+  
+  stepsList: {
+    gap: 8,
+  },
+  
+  stepItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  
+  stepIcon: {
+    fontSize: 16,
+    width: 24,
+    textAlign: 'center',
+  },
+  
+  stepContent: {
+    flex: 1,
+  },
+  
+  stepName: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 4,
+  },
+  
+  stepProgressBar: {
+    height: 4,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  
+  stepProgressFill: {
+    height: '100%',
+    backgroundColor: '#3b82f6',
+    borderRadius: 2,
+  },
+  
+  stepPercent: {
+    fontSize: 11,
+    color: '#6b7280',
+    fontWeight: '500',
+    minWidth: 32,
+    textAlign: 'right',
+  },
+  
+  // Pipeline Success
+  pipelineSuccessDescription: {
+    fontSize: 14,
+    color: '#374151',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  
+  pipelineStepsCompleted: {
+    marginBottom: 20,
+    gap: 8,
+  },
+  
+  completedStep: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#f0f9ff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+  },
+  
+  completedStepIcon: {
+    fontSize: 16,
+    marginRight: 12,
+  },
+  
+  completedStepText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  
+  completedStepStatus: {
+    fontSize: 16,
+  },
+  
+  runAgainButton: {
+    backgroundColor: '#3b82f6',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  
+  runAgainButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  
+  // Pipeline Error
+  errorCard: {
+    padding: 20,
+    backgroundColor: '#fef2f2',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+  },
+  
+  errorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  
+  errorIcon: {
+    fontSize: 24,
+    marginRight: 8,
+  },
+  
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#dc2626',
+  },
+  
+  errorDescription: {
+    fontSize: 14,
+    color: '#7f1d1d',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  
+  errorActions: {
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'center',
+  },
+  
+  retryButton: {
+    backgroundColor: '#dc2626',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: 'center',
+  },
+  
+  retryButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  
+  resetButton: {
+    backgroundColor: '#6b7280',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: 'center',
+  },
+  
+  resetButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  
+  // Quick Actions Update
+  quickActionsDescription: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  
+  // Configuration Modal
+  configModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    margin: 20,
+    maxHeight: '90%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  
+  configContent: {
+    maxHeight: 400,
+  },
+  
+  configSection: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  
+  configSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#374151',
+    marginBottom: 12,
+  },
+  
+  dateInputs: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  
+  dateInput: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: '#f9fafb',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  
+  dateLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+  
+  dateValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  
+  parameterInput: {
+    marginBottom: 16,
+  },
+  
+  parameterLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  
+  sliderContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  
+  sliderButton: {
+    width: 36,
+    height: 36,
+    backgroundColor: '#3b82f6',
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  sliderButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  
+  sliderValue: {
+    minWidth: 60,
+    height: 36,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  
+  sliderValueText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#374151',
+  },
+  
+  toggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#f9fafb',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  
+  toggleIcon: {
+    fontSize: 16,
+    marginRight: 12,
+  },
+  
+  toggleText: {
+    fontSize: 14,
+    color: '#374151',
+    flex: 1,
+  },
+  
+  configModalFooter: {
+    flexDirection: 'row',
+    padding: 16,
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f3f4f6',
+  },
+  
+  configCancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  
+  configCancelText: {
+    color: '#6b7280',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  
+  configStartButton: {
+    flex: 2,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    backgroundColor: '#3b82f6',
+    alignItems: 'center',
+  },
+  
+  configStartText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

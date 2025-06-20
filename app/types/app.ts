@@ -34,20 +34,7 @@ export interface OptimizationState {
   fitnessHistory: number[];
 }
 
-export interface ForecastingState {
-  prophetRunning: boolean;
-  lstmRunning: boolean;
-  prophetAccuracy: number;
-  lstmAccuracy: number;
-  selectedModel: string;
-  forecastDays: string;
-  results: {
-    nextWeekPassengers: number;
-    peakHour: string;
-    busiestRoute: string;
-    improvement: number;
-  };
-}
+
 
 // Simulasyon sonuçları için ayrı interface
 export interface SimulationResults {
@@ -102,4 +89,116 @@ export interface ReportsState {
 export interface ModalState {
   fileUpload: boolean;
   dataViewer: boolean;
+}
+
+export interface PipelineState {
+  isRunning: boolean;
+  progress: number;
+  currentStep: string;
+  pipelineId?: number;
+  status: 'idle' | 'running' | 'completed' | 'error' | 'cancelled';
+  startedAt?: string;
+  completedAt?: string;
+  error?: string;
+  config?: PipelineConfig;
+  results?: PipelineResults;
+  estimatedTime: string;
+}
+
+export interface PipelineConfig {
+  start_date: string;
+  end_date: string;
+  population_size: number;
+  generations: number;
+  hybrid_epochs: number;
+}
+
+export interface PipelineResults {
+  pipeline_id: number;
+  status: string;
+  successful_steps: number;
+  total_steps: number;
+  step_results: {
+    simulation?: any;
+    genetic_algorithm?: any;
+    passenger_flow_generation?: any;
+    hybrid_model?: any;
+    evaluation?: any;
+  };
+  final_outputs: {
+    simulation_data?: string;
+    optimized_schedule?: string;
+    optimized_passenger_flow?: string;
+    hybrid_predictions?: string;
+    evaluation_report?: string;
+  };
+}
+// types/app.ts - Güncellenmiş ForecastingState ve yeni HybridModelState
+
+export interface HybridModelState {
+  isRunning: boolean;
+  progress: number;
+  currentStep: string;
+  hybridId?: number;
+  status: 'idle' | 'running' | 'completed' | 'error' | 'timeout';
+  startedAt?: string;
+  completedAt?: string;
+  error?: string;
+  config?: HybridModelConfig;
+  results?: HybridModelResults;
+  estimatedDuration: string;
+}
+
+export interface HybridModelConfig {
+  historical_file: string;
+  future_file: string;
+  stops_file: string;
+  sequence_length: number;
+  epochs: number;
+  save_models: boolean;
+  load_pretrained: boolean;
+  enable_route_adjustments: boolean;
+  enable_realistic_constraints: boolean;
+  enable_night_constraints: boolean;
+  timeout: number;
+}
+
+export interface HybridModelResults {
+  hybrid_id: number;
+  status: string;
+  completed_at: string;
+  output_dir: string;
+  config: HybridModelConfig;
+  files: {
+    prediction_file: string;
+    final_prediction_file: string;
+    model_dir: string;
+    output_dir: string;
+  };
+  stats: {
+    total_records: number;
+    unique_trips: number;
+    unique_buses: number;
+    lines_covered: number;
+    date_range: {
+      start: string;
+      end: string;
+    };
+  };
+  stdout: string;
+  command: string;
+}
+
+// Güncellenmiş ForecastingState
+export interface ForecastingState {
+  hybridRunning: boolean;
+  hybridAccuracy: number;
+  forecastDays: string;
+  hybridModel: HybridModelState; // Yeni eklenen
+  results: {
+    nextWeekPassengers: number;
+    peakHour: string;
+    busiestRoute: string;
+    improvement: number;
+  };
 }

@@ -1,4 +1,4 @@
-// components/dashboard/FileUploadCard.tsx
+// components/dashboard/FileUploadCard.tsx - Düzeltilmiş import
 import React from 'react';
 import {
   ActivityIndicator,
@@ -8,7 +8,7 @@ import {
   View
 } from 'react-native';
 import { UploadedFile } from '../../types/app';
-import { User } from '../../types/auth';
+import { User } from '../../types/auth'; // ✅ Düzeltilmiş import
 
 interface Props {
   uploadedFiles: UploadedFile[];
@@ -427,11 +427,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginRight: 6,
     letterSpacing: 0.5,
-  },
-  uploadHintArrow: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
   },
 
   // Loading state

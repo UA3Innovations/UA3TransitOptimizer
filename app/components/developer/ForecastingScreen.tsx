@@ -1,7 +1,8 @@
-// components/developer/ForecastingScreen.tsx (Updated)
+// components/developer/ForecastingScreen.tsx (Real Hybrid Model Integration)
 import React from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   ScrollView,
   StyleSheet,
@@ -18,34 +19,53 @@ interface Props {
   forecasting: ForecastingState;
   setForecasting: (value: ForecastingState | ((prev: ForecastingState) => ForecastingState)) => void;
   uploadedFiles: UploadedFile[];
-  simulation: SimulationState; // Yeni eklenen prop
-  onRunProphet: () => void;
-  onRunLSTM: () => void;
+  simulation: SimulationState;
+  onRunHybrid: () => void;
+  onStopHybrid: () => void;
+  onResetHybrid: () => void;
 }
 
 export const ForecastingScreen: React.FC<Props> = ({
   forecasting,
   setForecasting,
   uploadedFiles,
-  simulation, // Yeni prop
-  onRunProphet,
-  onRunLSTM
+  simulation,
+  onRunHybrid,
+  onStopHybrid,
+  onResetHybrid
 }) => {
   // Data availability check
   const hasRealData = uploadedFiles.length > 0;
   const hasSimulationData = simulation.results && simulation.results.totalPassengers > 0;
   const canProceed = hasRealData || hasSimulationData;
 
+  const hybridModel = forecasting.hybridModel;
+  const isRunning = hybridModel.isRunning;
+  const hasResults = hybridModel.status === 'completed' && hybridModel.results;
+  const hasError = hybridModel.status === 'error';
+
+  const handleAdvancedOptions = () => {
+    Alert.alert(
+      'Advanced Configuration',
+      'Configure hybrid model parameters',
+      [
+        { text: 'Quick Run (30 epochs)', onPress: () => onRunHybrid() },
+        { text: 'Full Run (60 epochs)', onPress: () => onRunHybrid() },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.sectionHeader}>
         <View style={styles.headerIconContainer}>
-          <Text style={styles.headerIcon}>📈</Text>
+          <Text style={styles.headerIcon}>🚀</Text>
         </View>
-        <Text style={styles.sectionTitle}>ML Forecasting Models</Text>
+        <Text style={styles.sectionTitle}>Hybrid ML Forecasting Model</Text>
         <View style={styles.sectionSubtitleContainer}>
           <View style={styles.subtitleLine} />
-          <Text style={styles.sectionSubtitle}>Advanced Demand Prediction with Prophet & LSTM & Hibrit Models</Text>
+          <Text style={styles.sectionSubtitle}>Advanced Hybrid Demand Prediction (Prophet + LSTM)</Text>
           <View style={styles.subtitleLine} />
         </View>
       </View>
@@ -57,154 +77,8 @@ export const ForecastingScreen: React.FC<Props> = ({
         currentTool="forecasting"
       />
 
-      <View style={styles.modelGrid}>
-        {/* Prophet Model */}
-        <View style={styles.modelCard}>
-          <View style={styles.modelHeader}>
-            <View style={styles.modelTitleContainer}>
-              <View style={styles.modelIconContainer}>
-                <Text style={styles.modelIcon}>📊</Text>
-              </View>
-              <Text style={styles.modelTitle}>Prophet Model</Text>
-            </View>
-            {hasRealData && (
-              <View style={styles.dataSourceBadge}>
-                <Text style={styles.dataSourceText}>📊 Real Data</Text>
-              </View>
-            )}
-            {!hasRealData && hasSimulationData && (
-              <View style={[styles.dataSourceBadge, styles.simulationBadge]}>
-                <Text style={styles.dataSourceText}>🎲 Simulation Data</Text>
-              </View>
-            )}
-          </View>
-          
-          <Text style={styles.modelDescription}>
-            Seasonal decomposition and trend analysis for time series forecasting
-          </Text>
-          
-          <View style={styles.modelFeatures}>
-            <View style={styles.featuresHeader}>
-              <View style={styles.featuresIconContainer}>
-                <Text style={styles.featuresIcon}>⚡</Text>
-              </View>
-              <Text style={styles.featuresTitle}>Key Features</Text>
-            </View>
-            <View style={styles.featuresList}>
-              <View style={styles.featureItem}>
-                <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Automatic seasonality detection</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Holiday effects modeling</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Trend changepoint detection</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Uncertainty intervals</Text>
-              </View>
-            </View>
-          </View>
-          
-          <TouchableOpacity 
-            style={[styles.modelButton, (forecasting.prophetRunning || !canProceed) && styles.disabledButton]}
-            onPress={onRunProphet}
-            disabled={forecasting.prophetRunning || !canProceed}
-          >
-            <View style={styles.modelButtonContent}>
-              <View style={styles.modelButtonIconContainer}>
-                {forecasting.prophetRunning ? (
-                  <ActivityIndicator color="white" size="small" />
-                ) : (
-                  <Text style={styles.modelButtonIcon}>🚀</Text>
-                )}
-              </View>
-              <Text style={styles.modelButtonText}>
-                {forecasting.prophetRunning ? 'Running...' : 
-                 !canProceed ? 'Need Data' : 'Run Prophet'}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* LSTM Model */}
-        <View style={styles.modelCard}>
-          <View style={styles.modelHeader}>
-            <View style={styles.modelTitleContainer}>
-              <View style={[styles.modelIconContainer, styles.lstmIconContainer]}>
-                <Text style={styles.modelIcon}>🧠</Text>
-              </View>
-              <Text style={styles.modelTitle}>LSTM Model</Text>
-            </View>
-            {hasRealData && (
-              <View style={styles.dataSourceBadge}>
-                <Text style={styles.dataSourceText}>📊 Real Data</Text>
-              </View>
-            )}
-            {!hasRealData && hasSimulationData && (
-              <View style={[styles.dataSourceBadge, styles.simulationBadge]}>
-                <Text style={styles.dataSourceText}>🎲 Simulation Data</Text>
-              </View>
-            )}
-          </View>
-          
-          <Text style={styles.modelDescription}>
-            Deep learning neural network for complex pattern recognition
-          </Text>
-          
-          <View style={styles.modelFeatures}>
-            <View style={styles.featuresHeader}>
-              <View style={styles.featuresIconContainer}>
-                <Text style={styles.featuresIcon}>🔬</Text>
-              </View>
-              <Text style={styles.featuresTitle}>Key Features</Text>
-            </View>
-            <View style={styles.featuresList}>
-              <View style={styles.featureItem}>
-                <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Long-term memory retention</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Non-linear pattern learning</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Multi-variate inputs</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Deep architecture</Text>
-              </View>
-            </View>
-          </View>
-          
-          <TouchableOpacity 
-            style={[styles.modelButton, styles.lstmButton, (forecasting.lstmRunning || !canProceed) && styles.disabledButton]}
-            onPress={onRunLSTM}
-            disabled={forecasting.lstmRunning || !canProceed}
-          >
-            <View style={styles.modelButtonContent}>
-              <View style={styles.modelButtonIconContainer}>
-                {forecasting.lstmRunning ? (
-                  <ActivityIndicator color="white" size="small" />
-                ) : (
-                  <Text style={styles.modelButtonIcon}>🧠</Text>
-                )}
-              </View>
-              <Text style={styles.modelButtonText}>
-                {forecasting.lstmRunning ? 'Running...' : 
-                 !canProceed ? 'Need Data' : 'Run LSTM'}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* Hybrid Model */}
+      {/* Hybrid Model */}
+      <View style={styles.modelContainer}>
         <View style={styles.modelCard}>
           <View style={styles.modelHeader}>
             <View style={styles.modelTitleContainer}>
@@ -213,22 +87,35 @@ export const ForecastingScreen: React.FC<Props> = ({
               </View>
               <Text style={styles.modelTitle}>Hybrid Model</Text>
             </View>
-            {hasRealData && (
-              <View style={styles.dataSourceBadge}>
-                <Text style={styles.dataSourceText}>📊 Real Data</Text>
+            <View style={styles.statusBadgeContainer}>
+              {hasRealData && (
+                <View style={styles.dataSourceBadge}>
+                  <Text style={styles.dataSourceText}>📊 Real Data</Text>
+                </View>
+              )}
+              {!hasRealData && hasSimulationData && (
+                <View style={[styles.dataSourceBadge, styles.simulationBadge]}>
+                  <Text style={styles.dataSourceText}>🎲 Simulation Data</Text>
+                </View>
+              )}
+              <View style={[
+                styles.statusBadge,
+                isRunning && styles.runningBadge,
+                hasResults && styles.completedBadge,
+                hasError && styles.errorBadge
+              ]}>
+                <Text style={styles.statusText}>
+                  {isRunning ? 'RUNNING' : hasResults ? 'COMPLETED' : hasError ? 'ERROR' : 'READY'}
+                </Text>
               </View>
-            )}
-            {!hasRealData && hasSimulationData && (
-              <View style={[styles.dataSourceBadge, styles.simulationBadge]}>
-                <Text style={styles.dataSourceText}>🎲 Simulation Data</Text>
-              </View>
-            )}
+            </View>
           </View>
           
           <Text style={styles.modelDescription}>
-            Combined Prophet and LSTM ensemble for enhanced prediction accuracy
+            A hybrid model that combines Prophet and LSTM algorithms to achieve advanced forecasting accuracy
           </Text>
           
+          {/* Model Features */}
           <View style={styles.modelFeatures}>
             <View style={styles.featuresHeader}>
               <View style={styles.featuresIconContainer}>
@@ -239,7 +126,7 @@ export const ForecastingScreen: React.FC<Props> = ({
             <View style={styles.featuresList}>
               <View style={styles.featureItem}>
                 <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Prophet + LSTM ensemble</Text>
+                <Text style={styles.featureText}>Prophet + LSTM ensemble approach</Text>
               </View>
               <View style={styles.featureItem}>
                 <Text style={styles.featureBullet}>•</Text>
@@ -247,143 +134,161 @@ export const ForecastingScreen: React.FC<Props> = ({
               </View>
               <View style={styles.featureItem}>
                 <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Best of both methodologies</Text>
+                <Text style={styles.featureText}>Enhanced robustness and accuracy</Text>
               </View>
               <View style={styles.featureItem}>
                 <Text style={styles.featureBullet}>•</Text>
-                <Text style={styles.featureText}>Improved robustness</Text>
+                <Text style={styles.featureText}>Seasonality and trend analysis</Text>
               </View>
             </View>
           </View>
           
-          <TouchableOpacity 
-            style={[styles.modelButton, styles.hybridButton, (forecasting.prophetRunning || forecasting.lstmRunning || !canProceed) && styles.disabledButton]}
-            onPress={() => {
-              onRunProphet();
-              onRunLSTM();
-            }}
-            disabled={forecasting.prophetRunning || forecasting.lstmRunning || !canProceed}
-          >
-            <View style={styles.modelButtonContent}>
-              <View style={styles.modelButtonIconContainer}>
-                {(forecasting.prophetRunning || forecasting.lstmRunning) ? (
-                  <ActivityIndicator color="white" size="small" />
-                ) : (
-                  <Text style={styles.modelButtonIcon}>🚀</Text>
+          {/* Model Controls */}
+          <View style={styles.controlsContainer}>
+            <TouchableOpacity 
+              style={[styles.modelButton, (!canProceed || isRunning) && styles.disabledButton]}
+              onPress={onRunHybrid}
+              disabled={!canProceed || isRunning}
+            >
+              <View style={styles.modelButtonContent}>
+                <View style={styles.modelButtonIconContainer}>
+                  {isRunning ? (
+                    <ActivityIndicator color="white" size="small" />
+                  ) : (
+                    <Text style={styles.modelButtonIcon}>🚀</Text>
+                  )}
+                </View>
+                <Text style={styles.modelButtonText}>
+                  {isRunning ? 'Running...' : 
+                   !canProceed ? 'Data Required' : 'Run Hybrid Model'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+          
+          </View>
+        </View>
+
+        {/* Progress Card - Show when running */}
+        {isRunning && (
+          <View style={styles.progressCard}>
+            <View style={styles.cardTitleContainer}>
+              <View style={[styles.cardIconContainer, styles.progressIconContainer]}>
+                <ActivityIndicator color="#16a34a" size="small" />
+              </View>
+              <Text style={styles.cardTitle}>Model Progress</Text>
+            </View>
+            
+            <View style={styles.progressContainer}>
+              <View style={styles.progressHeader}>
+                <Text style={styles.progressText}>{"Model is in training process..."}</Text>
+
+              </View>
+              
+              <View style={styles.progressBar}>
+                <View 
+                  style={[
+                    styles.progressFill, 
+                    { width: `${hybridModel.progress}%` }
+                  ]} 
+                />
+              </View>
+              
+              <View style={styles.progressDetails}>
+                <Text style={styles.progressDetail}>
+                </Text>
+                {hybridModel.hybridId && (
+                  <Text style={styles.progressDetail}>
+                  </Text>
                 )}
               </View>
-              <Text style={styles.modelButtonText}>
-                {(forecasting.prophetRunning || forecasting.lstmRunning) ? 'Running Hybrid...' : 
-                 !canProceed ? 'Need Data' : 'Run Hybrid Model'}
-              </Text>
             </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Model Comparison */}
-      <View style={styles.comparisonCard}>
-        <View style={styles.cardTitleContainer}>
-          <View style={[styles.cardIconContainer, styles.comparisonIconContainer]}>
-            <Text style={styles.cardIcon}>🔄</Text>
-          </View>
-          <Text style={styles.cardTitle}>Model Comparison</Text>
-        </View>
-        
-        {(forecasting.prophetRunning || forecasting.lstmRunning) ? (
-          <View style={styles.loadingComparison}>
-            <View style={styles.loadingIconContainer}>
-              <ActivityIndicator size="large" color="#3b82f6" />
-            </View>
-            <Text style={styles.loadingText}>Running models to generate comparison...</Text>
-            <View style={styles.loadingDots}>
-              <Text style={styles.loadingDot}>•</Text>
-              <Text style={styles.loadingDot}>•</Text>
-              <Text style={styles.loadingDot}>•</Text>
-            </View>
-          </View>
-        ) : (forecasting.prophetAccuracy > 87.3 || forecasting.lstmAccuracy > 91.2) ? (
-          <View style={styles.comparisonContainer}>
-            <View style={styles.comparisonGrid}>
-              <View style={styles.comparisonHeader}>
-                <Text style={styles.comparisonMetric}>Metric</Text>
-                <Text style={styles.comparisonModel}>Prophet</Text>
-                <Text style={styles.comparisonModel}>LSTM</Text>
-                <Text style={styles.comparisonModel}>Hybrid</Text>
-              </View>
-              
-              <View style={styles.comparisonRow}>
-                <Text style={styles.comparisonMetric}>Accuracy</Text>
-                <View style={styles.comparisonValueContainer}>
-                  <Text style={[styles.comparisonValue, forecasting.prophetAccuracy > forecasting.lstmAccuracy && forecasting.prophetAccuracy > 93.5 && styles.comparisonBest]}>
-                    {forecasting.prophetAccuracy.toFixed(1)}%
-                  </Text>
-                </View>
-                <View style={styles.comparisonValueContainer}>
-                  <Text style={[styles.comparisonValue, forecasting.lstmAccuracy > forecasting.prophetAccuracy && forecasting.lstmAccuracy > 93.5 && styles.comparisonBest]}>
-                    {forecasting.lstmAccuracy.toFixed(1)}%
-                  </Text>
-                </View>
-                <View style={[styles.comparisonValueContainer, styles.bestValueContainer]}>
-                  <Text style={[styles.comparisonValue, styles.comparisonBest]}>
-                    {Math.max(forecasting.prophetAccuracy, forecasting.lstmAccuracy) + 2.3 > 96 ? '96.0' : (Math.max(forecasting.prophetAccuracy, forecasting.lstmAccuracy) + 2.3).toFixed(1)}%
-                  </Text>
-                </View>
-              </View>
-              
-              <View style={styles.comparisonRow}>
-                <Text style={styles.comparisonMetric}>Data Source</Text>
-                <Text style={[styles.comparisonValue, { textAlign: 'center' }]}>
-                  {hasRealData ? 'Real' : hasSimulationData ? 'Simulated' : 'None'}
-                </Text>
-                <Text style={[styles.comparisonValue, { textAlign: 'center' }]}>
-                  {hasRealData ? 'Real' : hasSimulationData ? 'Simulated' : 'None'}
-                </Text>
-                <Text style={[styles.comparisonValue, { textAlign: 'center' }]}>
-                  {hasRealData ? 'Real' : hasSimulationData ? 'Simulated' : 'None'}
-                </Text>
-              </View>
-              
-              <View style={styles.comparisonRow}>
-                <Text style={styles.comparisonMetric}>Training Speed</Text>
-                <View style={[styles.comparisonValueContainer, styles.bestValueContainer]}>
-                  <Text style={[styles.comparisonValue, styles.comparisonBest]}>Fast</Text>
-                </View>
-                <View style={styles.comparisonValueContainer}>
-                  <Text style={styles.comparisonValue}>Slow</Text>
-                </View>
-                <View style={styles.comparisonValueContainer}>
-                  <Text style={styles.comparisonValue}>Medium</Text>
-                </View>
-              </View>
-              
-              <View style={styles.comparisonRow}>
-                <Text style={styles.comparisonMetric}>Robustness</Text>
-                <View style={styles.comparisonValueContainer}>
-                  <Text style={styles.comparisonValue}>Good</Text>
-                </View>
-                <View style={styles.comparisonValueContainer}>
-                  <Text style={styles.comparisonValue}>Good</Text>
-                </View>
-                <View style={[styles.comparisonValueContainer, styles.bestValueContainer]}>
-                  <Text style={[styles.comparisonValue, styles.comparisonBest]}>Excellent</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.emptyComparison}>
-            <View style={styles.emptyComparisonIconContainer}>
-              <Text style={styles.emptyComparisonIcon}>📊</Text>
-            </View>
-            <Text style={styles.emptyComparisonText}>Run models to see comparison results</Text>
-            <Text style={styles.emptyComparisonSubtext}>
-              {!canProceed 
-                ? 'Upload data or run simulation first' 
-                : 'Start Prophet, LSTM, or Hybrid model to populate this section'}
-            </Text>
           </View>
         )}
+
+        {/* Results Card */}
+        <View style={styles.resultsCard}>
+          <View style={styles.cardTitleContainer}>
+            <View style={[styles.cardIconContainer, styles.resultsIconContainer]}>
+              <Text style={styles.cardIcon}>📊</Text>
+            </View>
+            <Text style={styles.cardTitle}>Model Results</Text>
+          </View>
+          
+          {hasError ? (
+            <View style={styles.errorResults}>
+              <View style={styles.errorIconContainer}>
+                <Text style={styles.errorIcon}>❌</Text>
+              </View>
+              <Text style={styles.errorText}>Model Failed</Text>
+              <Text style={styles.errorSubtext}>{hybridModel.error}</Text>
+            </View>
+          ) : hasResults ? (
+            <View style={styles.resultsContainer}>
+              <View style={styles.accuracyContainer}>
+                <View style={styles.accuracyHeader}>
+                  <Text style={styles.accuracyTitle}>Model Performance</Text>
+                  <View style={styles.accuracyBadge}>
+                    <Text style={styles.accuracyValue}>{forecasting.hybridAccuracy.toFixed(1)}%</Text>
+                  </View>
+                </View>
+                <View style={styles.accuracyBar}>
+                  <View 
+                    style={[
+                      styles.accuracyFill, 
+                      { width: `${forecasting.hybridAccuracy}%` }
+                    ]} 
+                  />
+                </View>
+              </View>
+
+              <View style={styles.metricsGrid}>
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Records Processed</Text>
+                  <Text style={styles.metricValue}>
+                    {hybridModel.results?.stats?.total_records?.toLocaleString() || 'N/A'}
+                  </Text>
+                </View>
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Unique Trips</Text>
+                  <Text style={styles.metricValue}>
+                    {hybridModel.results?.stats?.unique_trips?.toLocaleString() || 'N/A'}
+                  </Text>
+                </View>
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Lines Covered</Text>
+                  <Text style={styles.metricValue}>
+                    {hybridModel.results?.stats?.lines_covered || 'N/A'}
+                  </Text>
+                </View>
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Status</Text>
+                  <Text style={styles.metricValue}>Completed</Text>
+                </View>
+              </View>
+
+              {hybridModel.completedAt && (
+                <View style={styles.completionInfo}>
+                  <Text style={styles.completionText}>
+                    Completed: {new Date(hybridModel.completedAt).toLocaleString()}
+                  </Text>
+                </View>
+              )}
+            </View>
+          ) : (
+            <View style={styles.emptyResults}>
+              <View style={styles.emptyResultsIconContainer}>
+                <Text style={styles.emptyResultsIcon}>🚀</Text>
+              </View>
+              <Text style={styles.emptyResultsText}>Run the Hybrid Model</Text>
+              <Text style={styles.emptyResultsSubtext}>
+                {!canProceed 
+                  ? 'Please upload data or run a simulation first' 
+                  : 'Start the hybrid model to generate advanced forecasts'}
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
     </ScrollView>
   );
@@ -412,12 +317,12 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#fef2f2',
+    backgroundColor: '#f0fdf4',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: '#fecaca',
+    borderColor: '#bbf7d0',
   },
   headerIcon: {
     fontSize: 28,
@@ -448,7 +353,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     letterSpacing: 0.5,
   },
-  modelGrid: {
+  modelContainer: {
     paddingHorizontal: 15,
     gap: 16,
   },
@@ -486,10 +391,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#fecaca',
   },
-  lstmIconContainer: {
-    backgroundColor: '#f0f9ff',
-    borderColor: '#bae6fd',
-  },
   hybridIconContainer: {
     backgroundColor: '#f0fdf4',
     borderColor: '#bbf7d0',
@@ -503,6 +404,10 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     letterSpacing: 0.3,
   },
+  statusBadgeContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   dataSourceBadge: {
     backgroundColor: '#dcfce7',
     paddingHorizontal: 8,
@@ -515,10 +420,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#dbeafe',
     borderColor: '#bfdbfe',
   },
+  statusBadge: {
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  runningBadge: {
+    backgroundColor: '#fef3c7',
+    borderColor: '#fcd34d',
+  },
+  completedBadge: {
+    backgroundColor: '#dcfce7',
+    borderColor: '#bbf7d0',
+  },
+  errorBadge: {
+    backgroundColor: '#fee2e2',
+    borderColor: '#fca5a5',
+  },
   dataSourceText: {
     fontSize: 11,
     fontWeight: '700',
     color: '#16a34a',
+    letterSpacing: 0.5,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#64748b',
     letterSpacing: 0.5,
   },
   modelDescription: {
@@ -570,7 +501,7 @@ const styles = StyleSheet.create({
   },
   featureBullet: {
     fontSize: 16,
-    color: '#dc2626',
+    color: '#16a34a',
     marginRight: 8,
     fontWeight: 'bold',
   },
@@ -580,23 +511,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flex: 1,
   },
+  controlsContainer: {
+    gap: 12,
+  },
   modelButton: {
-    backgroundColor: '#dc2626',
+    backgroundColor: '#16a34a',
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#dc2626',
+    shadowColor: '#16a34a',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 8,
-  },
-  lstmButton: {
-    backgroundColor: '#3b82f6',
-    shadowColor: '#3b82f6',
-  },
-  hybridButton: {
-    backgroundColor: '#16a34a',
-    shadowColor: '#16a34a',
   },
   disabledButton: {
     backgroundColor: '#e2e8f0',
@@ -627,9 +553,32 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
   },
-  comparisonCard: {
+  secondaryControls: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  secondaryButton: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  disabledSecondaryButton: {
+    backgroundColor: '#f1f5f9',
+    borderColor: '#e2e8f0',
+  },
+  secondaryButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748b',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+  progressCard: {
     backgroundColor: 'white',
-    margin: 15,
     padding: 24,
     borderRadius: 24,
     shadowColor: '#000',
@@ -656,7 +605,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#fecaca',
   },
-  comparisonIconContainer: {
+  progressIconContainer: {
+    backgroundColor: '#f0fdf4',
+    borderColor: '#bbf7d0',
+  },
+  resultsIconContainer: {
     backgroundColor: '#eff6ff',
     borderColor: '#bfdbfe',
   },
@@ -669,102 +622,181 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     letterSpacing: 0.5,
   },
-  comparisonContainer: {
+  progressContainer: {
+    gap: 12,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  progressText: {
+    fontSize: 14,
+    color: '#64748b',
+    fontWeight: '600',
+    flex: 1,
+  },
+  progressPercentage: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#16a34a',
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#16a34a',
+    borderRadius: 4,
+  },
+  progressDetails: {
+    gap: 4,
+  },
+  progressDetail: {
+    fontSize: 12,
+    color: '#94a3b8',
+    fontWeight: '500',
+  },
+  resultsCard: {
+    backgroundColor: 'white',
+    padding: 24,
+    borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  
+  // Error States
+  errorResults: {
+    alignItems: 'center',
+    padding: 24,
+    backgroundColor: '#fef2f2',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+  },
+  errorIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#fca5a5',
+  },
+  errorIcon: {
+    fontSize: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#dc2626',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  errorSubtext: {
+    fontSize: 13,
+    color: '#dc2626',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+
+  // Results Container
+  resultsContainer: {
+    gap: 20,
+  },
+  accuracyContainer: {
     backgroundColor: '#f8fafc',
     padding: 20,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
-  comparisonGrid: {
-    gap: 2,
-  },
-  comparisonHeader: {
+  accuracyHeader: {
     flexDirection: 'row',
-    paddingVertical: 16,
-    borderBottomWidth: 2,
-    borderBottomColor: '#e2e8f0',
-    marginBottom: 8,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-  },
-  comparisonRow: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    marginBottom: 4,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
+    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  comparisonMetric: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#334155',
-    letterSpacing: 0.3,
-  },
-  comparisonModel: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#3b82f6',
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
-  comparisonValueContainer: {
-    flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  bestValueContainer: {
-    backgroundColor: '#dcfce7',
-  },
-  comparisonValue: {
-    fontSize: 14,
-    color: '#64748b',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  comparisonBest: {
-    color: '#16a34a',
-    fontWeight: '800',
-  },
-  
-  // Loading and Empty States
-  loadingComparison: {
-    alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#f8fafc',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  loadingIconContainer: {
     marginBottom: 12,
   },
-  loadingText: {
+  accuracyTitle: {
     fontSize: 16,
-    color: '#64748b',
-    textAlign: 'center',
-    fontWeight: '600',
-    marginBottom: 12,
+    fontWeight: '700',
+    color: '#1e293b',
   },
-  loadingDots: {
+  accuracyBadge: {
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+  },
+  accuracyValue: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#16a34a',
+  },
+  accuracyBar: {
+    height: 8,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  accuracyFill: {
+    height: '100%',
+    backgroundColor: '#16a34a',
+    borderRadius: 4,
+  },
+  metricsGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 12,
   },
-  loadingDot: {
-    fontSize: 24,
-    color: '#3b82f6',
-    marginHorizontal: 2,
+  metricItem: {
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: '#f8fafc',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
-  emptyComparison: {
+  metricLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  metricValue: {
+    fontSize: 14,
+    color: '#1e293b',
+    fontWeight: '700',
+  },
+  completionInfo: {
+    backgroundColor: '#f0fdf4',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+  },
+  completionText: {
+    fontSize: 12,
+    color: '#16a34a',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+
+  // Empty Results
+  emptyResults: {
     alignItems: 'center',
     padding: 24,
     backgroundColor: '#f8fafc',
@@ -772,7 +804,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
-  emptyComparisonIconContainer: {
+  emptyResultsIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
@@ -783,10 +815,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#e2e8f0',
   },
-  emptyComparisonIcon: {
+  emptyResultsIcon: {
     fontSize: 20,
   },
-  emptyComparisonText: {
+  emptyResultsText: {
     fontSize: 16,
     fontWeight: '700',
     color: '#64748b',
@@ -794,7 +826,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 0.3,
   },
-  emptyComparisonSubtext: {
+  emptyResultsSubtext: {
     fontSize: 13,
     color: '#94a3b8',
     textAlign: 'center',

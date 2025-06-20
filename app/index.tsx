@@ -1,6 +1,4 @@
-// index.tsx (düzeltilmiş versiyon)
-import { styles } from './styles';
-
+// index.tsx (güncellenmiş versiyon - Complete Pipeline ile)
 import React, { useState } from 'react';
 import {
   Dimensions,
@@ -11,12 +9,12 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { styles } from './styles';
 
 // Import our custom hooks and components
 import { LoginScreen } from './components/auth/LoginScreen';
 import { FileUploadCard } from './components/dashboard/FileUploadCard';
-import { TestScreen } from './components/test/TestScreen';
-import { useAIProcess } from './hooks/useAIProcess';
+import { useAIProcess } from './hooks/useAIProcess'; // Updated with pipeline
 import { useAuth } from './hooks/useAuth';
 import { useFileUpload } from './hooks/useFileUpload';
 import { useForecasting } from './hooks/useForecasting';
@@ -25,16 +23,14 @@ import { useOptimization } from './hooks/useOptimization';
 import { useSimulation } from './hooks/useSimulation';
 
 // Import developer screens
+import { AdminReportsScreen } from './components/admin/AdminReportsScreen';
 import { ForecastingScreen } from './components/developer/ForecastingScreen';
 import { OptimizationScreen } from './components/developer/OptimizationScreen';
 import { ReportsScreen } from './components/developer/ReportsScreen';
 import { SimulationScreen } from './components/developer/SimulationScreen';
 
-import { AdminReportsScreen } from './components/admin/AdminReportsScreen';
-
 // Import types
 import { ModalState, ReportsState } from './types/app';
-
 const { width, height } = Dimensions.get('window');
 
 export default function HomeScreen() {
@@ -42,11 +38,27 @@ export default function HomeScreen() {
   const { user, loginData, setLoginData, loginError, handleLogin, handleLogout } = useAuth();
   const { metrics, setMetrics } = useMetrics(user);
   const { uploadedFiles, setUploadedFiles, isUploading, handleFileUpload, clearFiles } = useFileUpload();
-  const { aiProcess, startAIProcess } = useAIProcess(uploadedFiles, setMetrics);
+  
+  // ✅ Updated AI Process hook with complete pipeline
+  const { 
+    aiProcess, 
+    startAIProcess,
+    pipeline,
+    pipelineConfig,
+    setPipelineConfig,
+    startCompletePipeline,
+    resetPipeline,
+  } = useAIProcess(uploadedFiles, setMetrics);
+  
   const { simulation, setSimulation, runSimulation } = useSimulation(uploadedFiles);
   const { optimization, setOptimization, startOptimization } = useOptimization(uploadedFiles, simulation, setMetrics)
-  const { forecasting, setForecasting, runProphetModel, runLSTMModel } = useForecasting(uploadedFiles, simulation)
-
+const { 
+  forecasting, 
+  setForecasting, 
+  runHybridModel,
+  stopHybridModel,    // EKSIK OLAN
+  resetHybridModel    // EKSIK OLAN
+} = useForecasting(uploadedFiles, simulation);
   // App State
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
 
@@ -87,8 +99,20 @@ export default function HomeScreen() {
 
   // Navigation handler for simulation
   const handleGoToSimulation = () => {
-    console.log('Navigating to simulation...'); // Debug log
+    console.log('Navigating to simulation...');
     setCurrentTab('simulation');
+  };
+
+  // ✅ Pipeline Configuration Modal
+  const [showPipelineConfig, setShowPipelineConfig] = useState(false);
+
+  const handleConfigurePipeline = () => {
+    setShowPipelineConfig(true);
+  };
+
+  const handleStartCustomPipeline = () => {
+    startCompletePipeline(pipelineConfig);
+    setShowPipelineConfig(false);
   };
 
   // Login screen
@@ -103,6 +127,163 @@ export default function HomeScreen() {
     );
   }
 
+  // ✅ Updated AI Control Card with Complete Pipeline
+  const renderAIControlCard = () => (
+    <View style={styles.aiControlCard}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardTitle}>🚀 Complete Optimization Pipeline</Text>
+        <View style={styles.aiStatusBadge}>
+          <Text style={styles.aiStatusText}>
+            {pipeline.status === 'idle' ? 'Ready' : 
+             pipeline.status === 'running' ? 'Running' :
+             pipeline.status === 'completed' ? 'Completed' : 
+             pipeline.status === 'error' ? 'Error' : 'Ready'}
+          </Text>
+        </View>
+      </View>
+      
+      {pipeline.status === 'idle' ? (
+        <View>
+          <Text style={styles.aiDescription}>
+            Complete 5-step optimization pipeline: Simulation → Genetic Algorithm → Passenger Flow → Hybrid ML → Evaluation
+          </Text>
+          
+          <View style={styles.pipelineOptionsContainer}>
+
+            <TouchableOpacity 
+              style={[styles.fullPipelineButton, uploadedFiles.length === 0 && styles.disabledButton]}
+              onPress={() => startCompletePipeline()}
+              disabled={uploadedFiles.length === 0}
+            >
+              <View style={styles.buttonContent}>
+                <Text style={styles.buttonIcon}>🎯</Text>
+                <View style={styles.buttonTextContainer}>
+                  <Text style={styles.primaryButtonText}>Pipeline</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.configButton, uploadedFiles.length === 0 && styles.disabledButton]}
+              onPress={handleConfigurePipeline}
+              disabled={uploadedFiles.length === 0}
+            >
+              <Text style={styles.configButtonText}>⚙️ Configure Pipeline</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {uploadedFiles.length === 0 && (
+            <Text style={styles.requirementText}>Upload data files to begin optimization</Text>
+          )}
+        </View>
+      ) : pipeline.status === 'running' ? (
+        <View style={styles.processStatus}>
+          <View style={styles.processHeader}>
+            <Text style={styles.processStep}>{pipeline.currentStep}</Text>
+            <Text style={styles.processProgress}>{pipeline.progress.toFixed(0)}%</Text>
+          </View>
+          <View style={styles.progressBarContainer}>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${pipeline.progress}%` }]} />
+            </View>
+          </View>
+          
+
+
+        </View>
+      ) : pipeline.status === 'completed' ? (
+        <View style={styles.resultsCard}>
+          <View style={styles.successHeader}>
+            <Text style={styles.successIcon}>✨</Text>
+            <Text style={styles.successTitle}>Complete Pipeline Finished!</Text>
+          </View>
+          
+          <Text style={styles.pipelineSuccessDescription}>
+            All 5 optimization steps completed successfully. Results are available in each section.
+          </Text>
+          
+          <View style={styles.pipelineStepsCompleted}>
+            <View style={styles.completedStep}>
+              <Text style={styles.completedStepIcon}>🚇</Text>
+              <Text style={styles.completedStepText}>Simulation</Text>
+              <Text style={styles.completedStepStatus}>✅</Text>
+            </View>
+            <View style={styles.completedStep}>
+              <Text style={styles.completedStepIcon}>🧬</Text>
+              <Text style={styles.completedStepText}>Genetic Algorithm</Text>
+              <Text style={styles.completedStepStatus}>✅</Text>
+            </View>
+            <View style={styles.completedStep}>
+              <Text style={styles.completedStepIcon}>👥</Text>
+              <Text style={styles.completedStepText}>Passenger Flow</Text>
+              <Text style={styles.completedStepStatus}>✅</Text>
+            </View>
+            <View style={styles.completedStep}>
+              <Text style={styles.completedStepIcon}>🤖</Text>
+              <Text style={styles.completedStepText}>Hybrid Model</Text>
+              <Text style={styles.completedStepStatus}>✅</Text>
+            </View>
+            <View style={styles.completedStep}>
+              <Text style={styles.completedStepIcon}>📊</Text>
+              <Text style={styles.completedStepText}>Evaluation</Text>
+              <Text style={styles.completedStepStatus}>✅</Text>
+            </View>
+          </View>
+
+          <View style={styles.improvementGrid}>
+            <View style={styles.improvementItem}>
+              <Text style={styles.improvementIcon}>⏱️</Text>
+              <Text style={styles.improvementLabel}>Wait Time Reduced</Text>
+            </View>
+            <View style={styles.improvementItem}>
+              <Text style={styles.improvementIcon}>📈</Text>
+              <Text style={styles.improvementLabel}>Efficiency Gained</Text>
+            </View>
+            <View style={styles.improvementItem}>
+              <Text style={styles.improvementIcon}>🎯</Text>
+              <Text style={styles.improvementLabel}>Overcrowding Cut</Text>
+            </View>
+            <View style={styles.improvementItem}>
+              <Text style={styles.improvementIcon}>😊</Text>
+              <Text style={styles.improvementLabel}>Satisfaction Up</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.runAgainButton}
+            onPress={() => startCompletePipeline()}
+          >
+            <Text style={styles.runAgainButtonText}>🔄 Run Pipeline Again</Text>
+          </TouchableOpacity>
+        </View>
+      ) : pipeline.status === 'error' ? (
+        <View style={styles.errorCard}>
+          <View style={styles.errorHeader}>
+            <Text style={styles.errorIcon}>❌</Text>
+            <Text style={styles.errorTitle}>Pipeline Failed</Text>
+          </View>
+          <Text style={styles.errorDescription}>
+            {pipeline.error || 'An unknown error occurred during pipeline execution.'}
+          </Text>
+          <View style={styles.errorActions}>
+            <TouchableOpacity 
+              style={styles.retryButton}
+              onPress={() => startCompletePipeline()}
+            >
+              <Text style={styles.retryButtonText}>🔄 Retry Pipeline</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.resetButton}
+              onPress={resetPipeline}
+            >
+              <Text style={styles.resetButtonText}>↺ Reset</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : null}
+    </View>
+  );
+
   // Main Dashboard Content
   const renderDashboard = () => (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -114,90 +295,19 @@ export default function HomeScreen() {
         user={user}
         onFileUpload={handleFileUpload}
         onViewData={() => setModals(prev => ({ ...prev, dataViewer: true }))}
-        onGoToSimulation={handleGoToSimulation} // Bu satırı ekledim!
+        onGoToSimulation={handleGoToSimulation}
       />
 
-      {/* AI Process Control */}
-      <View style={styles.aiControlCard}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>🤖 AI Optimization Engine</Text>
-          <View style={styles.aiStatusBadge}>
-            <Text style={styles.aiStatusText}>
-              {aiProcess.stage === 'idle' ? 'Ready' : 
-               aiProcess.stage === 'completed' ? 'Completed' : 'Processing'}
-            </Text>
-          </View>
-        </View>
-        
-        {aiProcess.stage === 'idle' ? (
-          <View>
-            <Text style={styles.aiDescription}>
-              Advanced machine learning algorithms will analyze your data and optimize transit schedules for maximum efficiency.
-            </Text>
-            <TouchableOpacity 
-              style={[styles.primaryButton, uploadedFiles.length === 0 && styles.disabledButton]}
-              onPress={startAIProcess}
-              disabled={uploadedFiles.length === 0}
-            >
-              <View style={styles.buttonContent}>
-                <Text style={styles.buttonIcon}>🚀</Text>
-                <Text style={styles.primaryButtonText}>Start AI Optimization</Text>
-              </View>
-            </TouchableOpacity>
-            {uploadedFiles.length === 0 && (
-              <Text style={styles.requirementText}>Upload data files to begin optimization</Text>
-            )}
-          </View>
-        ) : aiProcess.stage !== 'completed' ? (
-          <View style={styles.processStatus}>
-            <View style={styles.processHeader}>
-              <Text style={styles.processStep}>{aiProcess.currentStep}</Text>
-              <Text style={styles.processProgress}>{aiProcess.progress.toFixed(0)}%</Text>
-            </View>
-            <View style={styles.progressBarContainer}>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${aiProcess.progress}%` }]} />
-              </View>
-            </View>
-            <Text style={styles.processTime}>Time remaining: {aiProcess.estimatedTime}</Text>
-          </View>
-        ) : (
-          <View style={styles.resultsCard}>
-            <View style={styles.successHeader}>
-              <Text style={styles.successIcon}>✨</Text>
-              <Text style={styles.successTitle}>Optimization Completed!</Text>
-            </View>
-            
-            <View style={styles.improvementGrid}>
-              <View style={styles.improvementItem}>
-                <Text style={styles.improvementIcon}>⏱️</Text>
-                <Text style={styles.improvementValue}>-15%</Text>
-                <Text style={styles.improvementLabel}>Wait Time Reduced</Text>
-              </View>
-              <View style={styles.improvementItem}>
-                <Text style={styles.improvementIcon}>📈</Text>
-                <Text style={styles.improvementValue}>+12%</Text>
-                <Text style={styles.improvementLabel}>Efficiency Gained</Text>
-              </View>
-              <View style={styles.improvementItem}>
-                <Text style={styles.improvementIcon}>🎯</Text>
-                <Text style={styles.improvementValue}>-40%</Text>
-                <Text style={styles.improvementLabel}>Overcrowding Cut</Text>
-              </View>
-              <View style={styles.improvementItem}>
-                <Text style={styles.improvementIcon}>😊</Text>
-                <Text style={styles.improvementValue}>+25%</Text>
-                <Text style={styles.improvementLabel}>Satisfaction Up</Text>
-              </View>
-            </View>
-          </View>
-        )}
-      </View>
+      {/* ✅ Updated AI Control Card */}
+      {renderAIControlCard()}
 
       {/* Developer Quick Actions */}
       {user.role === 'developer' && (
         <View style={styles.quickActionsCard}>
           <Text style={styles.cardTitle}>⚡ Development Tools</Text>
+          <Text style={styles.quickActionsDescription}>
+            Individual components of the complete pipeline for testing and development
+          </Text>
           <View style={styles.quickActions}>
             <TouchableOpacity 
               style={styles.quickActionButton}
@@ -223,15 +333,13 @@ export default function HomeScreen() {
             >
               <Text style={styles.quickActionIcon}>📈</Text>
               <Text style={styles.quickActionText}>ML Forecasting</Text>
-              <Text style={styles.quickActionDesc}>Prophet & LSTM & Hibrit models</Text>
+              <Text style={styles.quickActionDesc}>Prophet & LSTM & Hybrid models</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
     </ScrollView>
   );
-
-  // Ana index.tsx dosyasında renderContent fonksiyonunu güncelleyin:
 
   const renderContent = () => {
     if (user?.role === 'admin') {
@@ -248,7 +356,7 @@ export default function HomeScreen() {
       }
       return renderDashboard();
     } else {
-      // Developer view - simulation prop'u eklendi
+      // Developer view
       switch (currentTab) {
         case 'dashboard':
           return renderDashboard();
@@ -258,7 +366,7 @@ export default function HomeScreen() {
               optimization={optimization}
               setOptimization={setOptimization}
               uploadedFiles={uploadedFiles}
-              simulation={simulation} // ✅ Yeni eklenen prop
+              simulation={simulation}
               onStartOptimization={startOptimization}
             />
           );
@@ -277,9 +385,10 @@ export default function HomeScreen() {
               forecasting={forecasting}
               setForecasting={setForecasting}
               uploadedFiles={uploadedFiles}
-              simulation={simulation} // ✅ Yeni eklenen prop
-              onRunProphet={runProphetModel}
-              onRunLSTM={runLSTMModel}
+              simulation={simulation}
+              onRunHybrid={runHybridModel}
+              onStopHybrid={stopHybridModel}    // EKSIK OLAN
+              onResetHybrid={resetHybridModel}  // EKSIK OLAN
             />
           );
         case 'reports':
@@ -291,8 +400,6 @@ export default function HomeScreen() {
           );
         default:
           return renderDashboard();
-        case 'test':
-          return <TestScreen />;
       }
     }
   };
@@ -334,7 +441,6 @@ export default function HomeScreen() {
             { key: 'simulation', icon: '🎯', label: 'Simulation' },
             { key: 'forecasting', icon: '📈', label: 'ML Models' },
             { key: 'reports', icon: '📋', label: 'Reports' },
-            { key: 'test', icon: '🧪', label: 'Test' }
           ].map((tab) => (
             <TouchableOpacity
               key={tab.key}
@@ -377,6 +483,158 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* ✅ Pipeline Configuration Modal */}
+      <Modal
+        visible={showPipelineConfig}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowPipelineConfig(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowPipelineConfig(false)}
+        >
+          <TouchableOpacity 
+            style={styles.configModalContent}
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>⚙️ Pipeline Configuration</Text>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setShowPipelineConfig(false)}
+              >
+                <Text style={styles.modalClose}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.configContent}>
+              <View style={styles.configSection}>
+                <Text style={styles.configSectionTitle}>📅 Simulation Period</Text>
+                <View style={styles.dateInputs}>
+                  <View style={styles.dateInput}>
+                    <Text style={styles.dateLabel}>Start Date:</Text>
+                    <Text style={styles.dateValue}>{pipelineConfig.start_date}</Text>
+                  </View>
+                  <View style={styles.dateInput}>
+                    <Text style={styles.dateLabel}>End Date:</Text>
+                    <Text style={styles.dateValue}>{pipelineConfig.end_date}</Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.configSection}>
+                <Text style={styles.configSectionTitle}>🧬 Genetic Algorithm</Text>
+                <View style={styles.parameterInput}>
+                  <Text style={styles.parameterLabel}>Population Size: {pipelineConfig.population_size}</Text>
+                  <View style={styles.sliderContainer}>
+                    <TouchableOpacity 
+                      style={styles.sliderButton}
+                      onPress={() => setPipelineConfig(prev => ({ 
+                        ...prev, 
+                        population_size: Math.max(10, prev.population_size - 5) 
+                      }))}
+                    >
+                      <Text style={styles.sliderButtonText}>-</Text>
+                    </TouchableOpacity>
+                    <View style={styles.sliderValue}>
+                      <Text style={styles.sliderValueText}>{pipelineConfig.population_size}</Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={styles.sliderButton}
+                      onPress={() => setPipelineConfig(prev => ({ 
+                        ...prev, 
+                        population_size: Math.min(50, prev.population_size + 5) 
+                      }))}
+                    >
+                      <Text style={styles.sliderButtonText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.parameterInput}>
+                  <Text style={styles.parameterLabel}>Generations: {pipelineConfig.generations}</Text>
+                  <View style={styles.sliderContainer}>
+                    <TouchableOpacity 
+                      style={styles.sliderButton}
+                      onPress={() => setPipelineConfig(prev => ({ 
+                        ...prev, 
+                        generations: Math.max(10, prev.generations - 5) 
+                      }))}
+                    >
+                      <Text style={styles.sliderButtonText}>-</Text>
+                    </TouchableOpacity>
+                    <View style={styles.sliderValue}>
+                      <Text style={styles.sliderValueText}>{pipelineConfig.generations}</Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={styles.sliderButton}
+                      onPress={() => setPipelineConfig(prev => ({ 
+                        ...prev, 
+                        generations: Math.min(100, prev.generations + 5) 
+                      }))}
+                    >
+                      <Text style={styles.sliderButtonText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.configSection}>
+                <Text style={styles.configSectionTitle}>🤖 Hybrid Model</Text>
+                <View style={styles.parameterInput}>
+                  <Text style={styles.parameterLabel}>Training Epochs: {pipelineConfig.hybrid_epochs}</Text>
+                  <View style={styles.sliderContainer}>
+                    <TouchableOpacity 
+                      style={styles.sliderButton}
+                      onPress={() => setPipelineConfig(prev => ({ 
+                        ...prev, 
+                        hybrid_epochs: Math.max(20, prev.hybrid_epochs - 10) 
+                      }))}
+                    >
+                      <Text style={styles.sliderButtonText}>-</Text>
+                    </TouchableOpacity>
+                    <View style={styles.sliderValue}>
+                      <Text style={styles.sliderValueText}>{pipelineConfig.hybrid_epochs}</Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={styles.sliderButton}
+                      onPress={() => setPipelineConfig(prev => ({ 
+                        ...prev, 
+                        hybrid_epochs: Math.min(200, prev.hybrid_epochs + 10) 
+                      }))}
+                    >
+                      <Text style={styles.sliderButtonText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.configSection}>
+
+              </View>
+            </ScrollView>
+            
+            <View style={styles.configModalFooter}>
+              <TouchableOpacity
+                style={styles.configCancelButton}
+                onPress={() => setShowPipelineConfig(false)}
+              >
+                <Text style={styles.configCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.configStartButton}
+                onPress={handleStartCustomPipeline}
+              >
+                <Text style={styles.configStartText}>🚀 Start Pipeline</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Data Viewer Modal */}
       <Modal
